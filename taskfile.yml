@@ -1,0 +1,184 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+output: prefixed
+silent: true
+interval: 250ms
+
+dotenv: [.env]
+
+vars:
+  PATH_DIR_SKAL_MAIN: ./cmd/skal
+  PATH_DIR_BIN: ./bin
+  PATH_FILE_DEV_BIN: '{{ .PATH_DIR_BIN }}/skal{{ if eq OS "windows" }}.exe{{ end }}'
+  PATH_FILE_VERSION: .github/VERSION
+
+tasks:
+  ##############################################################################
+  #                                                                            #
+  #                          GitHub Release Management                         #
+  #                                                                            #
+  ##############################################################################
+  create-release:
+    aliases: [cr]
+    desc: Creates a GitHub release.
+    vars:
+      # The tag to create the release from.
+      tag: '{{ .tag }}'
+      # The title to use for the release.
+      title: '{{ .title }}'
+      # The body to use for the release.
+      body: '{{ if .body }}{{ .body }}{{ else }}{{ end }}'
+    cmd: |
+      gh release create '{{ .tag }}' \
+        --title '{{ .title }}' \
+        --notes '{{ .body }}' \
+        --repo 'illbjorn/skal' \
+        ./bin/*
+
+  build-ci:
+    aliases: [bci]
+    desc: Performs the multi-GOOS/GOARCH build for GitHub releases.
+    vars:
+      TARGETS:
+        - GOOS: windows
+          GOARCH: amd64
+        - GOOS: windows
+          GOARCH: arm64
+        - GOOS: darwin
+          GOARCH: amd64
+        - GOOS: darwin
+          GOARCH: arm64
+        - GOOS: linux
+          GOARCH: amd64
+        - GOOS: linux
+          GOARCH: arm64
+    cmds:
+      - mkdir -p bin
+      - # noinspection YAMLSchemaValidation
+        for:
+          var: TARGETS
+          as: TARGET
+        cmd: |
+          GOOS='{{ .TARGET.GOOS }}' GOARCH='{{ .TARGET.GOARCH }}' go build \
+            -o './bin/skal-{{ .TARGET.GOOS }}-{{ .TARGET.GOARCH }}{{ if eq .TARGET.GOOS "windows" }}.exe{{ end }}' \
+            '{{ .PATH_DIR_SKAL_MAIN }}'
+
+  release-notes:
+    aliases: [rn]
+    interactive: true
+    silent: true
+    desc: |
+      Produces a set of markdown unordered list bullet points of each commit
+      message between provided refs `s` (start) and `e` (end).
+    cmd: git log --pretty=format:'- %s' {{ .s }}...{{ .e }}
+
+  ##############################################################################
+  #                                                                            #
+  #                             Git Tag Management                             #
+  #                                                                            #
+  ##############################################################################
+  create-tag:
+    aliases: [ct]
+    desc: Creates a Git tag.
+    vars:
+      tag: '{{ .tag }}'
+    cmd: git tag '{{ .tag }}' && git push origin '{{ .tag }}'
+
+  ##############################################################################
+  #                                                                            #
+  #                             Version Management                             #
+  #                                                                            #
+  ##############################################################################
+  ver:
+    aliases: [v]
+    desc: Outputs the current Skal version.
+    silent: true
+    interactive: true
+    cmd: cat '{{ .PATH_FILE_VERSION }}'
+
+  bump:
+    aliases: [b]
+    desc: |
+      Performs a bump of the project's version.
+
+      The segment of the version string incremented can be controlled by the 's'
+      command-line value.
+
+      Example:
+        $ cat .github/VERSION
+        0.0.9
+        $ task b s=patch
+        Bumping version 0.0.9 -> 0.0.10.
+        $ task b s=minor
+        Bumping version 0.0.9 -> 0.1.0.
+        $ task b s=major
+        Bumping version 0.0.9 -> 1.0.0.
+    vars:
+      # Controls the version string segment to be incremented.
+      # This is intended to be provided as a command-line input but will default
+      # to `patch`.
+      s: '{{ if .s }}{{ .s }}{{ else }}patch{{ end }}'
+    cmds:
+      # Bump the version in the file.
+      - .github/scripts/bump.sh '{{ .s }}' '{{ .PATH_FILE_VERSION }}'
+
+  ##############################################################################
+  #                                                                            #
+  #                                  Dev Loop                                  #
+  #                                                                            #
+  ##############################################################################
+  dev: &task-dev
+    desc: Performs a build and runs the compiler against a Skal source file.
+    cmds:
+      - clear
+      - go run '{{ .PATH_DIR_SKAL_MAIN }}' c '{{ .DEV_SRC }}' '{{ .DEV_DST }}'
+
+  devw:
+    desc: Performs a build and runs the compiler against a Skal source file, in watch mode.
+    sources:
+      - '**/*.go'
+      - '{{ .DEV_WATCH }}'
+    generates:
+      - '{{ .PATH_FILE_DEV_BIN }}'
+    watch: true
+    <<: *task-dev
+
+  build:
+    aliases: [bu]
+    desc: Builds a Skal compiler binary.
+    cmds:
+      - mkdir -p ./bin
+      - go build -o ./bin/skal{{ if eq OS "windows" }}.exe{{ end }} '{{ .PATH_DIR_SKAL_MAIN }}'
+
+  install:
+    aliases: [i]
+    desc: Performs a `go install` of the Skal compiler.
+    cmd: go install ./cmd/skal
+
+  count:
+    aliases: [c]
+    desc: Counts lines of Go code in this repository.
+    cmd: |
+      files=$(find . -type f -name '*.go')
+      total=0
+      for f in $files; do
+        lines=$(wc -l "${f}" | awk '{print $1}')
+        ((total+=lines))
+      done
+      echo $total
+
+  test:
+    aliases: [t]
+    desc: Runs all Go tests.
+    cmd: go test ./...
+
+  install-linter:
+    aliases: [il]
+    desc: Installs the Golangci-Lint binary.
+    cmd: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
+
+  lint:
+    aliases: [l]
+    desc: Runs the Golangci linter.
+    cmd: golangci-lint run ./...

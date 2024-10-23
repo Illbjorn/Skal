@@ -1,0 +1,37 @@
+name: On Merge to Main
+
+on:
+  push:
+    branches: [main]
+    paths: ['**/*.go', 'go.mod', 'go.sum']
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}
+
+jobs:
+  run:
+    name: On Merge to Main
+    runs-on: self-hosted
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+
+      - name: Setup Task
+        uses: ./.github/actions/setup-task
+
+      - name: Build Skal Binaries
+        shell: bash
+        run: task bci
+
+      - name: Create the GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          task cr \
+            tag="$(task v)" \
+            title="Skal Release: $(task v)" \
+            body="$(task rn)"

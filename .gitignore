@@ -1,0 +1,19 @@
+# Editor Configs
+.idea
+.vscode
+
+# Task Watch Checksums
+.task/checksum
+
+# Local Binary Builds
+bin
+
+# AST Node Dumps
+*.json
+
+# .env Files
+.env
+
+# Lua / Skal Source Files
+**/*.lua
+**/*.sk

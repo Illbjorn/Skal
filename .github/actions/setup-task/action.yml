@@ -1,0 +1,207 @@
+name: Setup Task
+description: >-
+  Pulls the 'Task' binary and adds it to "$GITHUB_PATH" for the remainder of the
+  job.
+
+inputs:
+  task_version:
+    description: >-
+      If a specific release version of task is desired - provide its Git tag
+      here.
+    required: false
+    default: v3.38.0
+
+  bin_dir:
+    description: >-
+      The path to store the retrieved Task binary.
+    required: false
+    default: ${{ github.workspace }}/.local/share/task
+
+  token:
+    description: >-
+      The GitHub token for the 'gh' CLI's usage.
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup
+      shell: bash
+      run: |
+        # confirm 'inputs.bin_dir' is not a file
+        if [[ -f "${{ inputs.bin_dir }}" ]]; then
+          echo "::error::'inputs.bin_dir' is a file. Value must be a directory."
+          exit 1
+        fi
+
+        # if 'inputs.bin_dir' exists -> we have no work to do here.
+        if [[ -d "${{ inputs.bin_dir }}" ]]; then
+          echo "Input 'bin_dir' directory exists."
+          exit 0
+        fi
+
+        # create 'inputs.bin_dir' directory
+        mkdir -p "${{ inputs.bin_dir }}"
+
+    - name: Get Release Binary Download Mask
+      shell: bash
+      run: |
+        # define GOOS value by runner OS
+        getOS () {
+          case "${{ runner.os }}" in
+            "Windows")
+              echo "windows"
+              ;;
+            "macOS")
+              echo "darwin"
+              ;;
+            "Linux")
+              echo "linux"
+              ;;
+            *)
+
+            echo "::error::Encountered unexpected runner OS: '${{ runner.os }}'."
+            exit 1
+          esac
+        }
+
+        # define GOARCH value depending on runner arch
+        getArch () {
+          case "${{ runner.arch }}" in
+            "X86")
+              echo "386"
+              ;;
+            "X64")
+              echo "amd64"
+              ;;
+            "arm")
+              echo "arm"
+              ;;
+            "arm64")
+              echo "arm64"
+              ;;
+            *)
+
+            echo "::error::Encountered unexpected runner architecture: '${{ runner.arch }}'."
+            exit 1
+          esac
+        }
+
+        # define file extension by runner OS and, if Linux, available package
+        # manager
+        getExt () {
+          case "${{ runner.os }}" in
+            "Linux")
+              if which dpkg >/dev/null 2>&1; then
+                echo "deb"
+              elif which rpm >/dev/null 2>&1; then
+                echo "rpm"
+              else
+                # attempt to source the /etc/os-release for use in error output
+                source /etc/os-release >/dev/null 2>&1
+
+                echo "::error::Failed to determine Linux package type."
+                echo "::error::Found distro ID '${ID}', version '${VERSION}'."
+                exit 1
+              fi
+              ;;
+
+            "macOS")
+              echo "tar.gz"
+              ;;
+
+            "Windows")
+              echo "zip"
+              ;;
+            *)
+
+            echo "::error::Encountered unexpected runner OS: '${{ runner.os }}'."
+            exit 1
+          esac
+        }
+
+        # get release artifact segments
+        # release file names look like:
+        # task_(darwin|linux|windows)_(amd64|386|arm|arm64).(tar.gz|rpm|deb|zip)
+        GOOS=$(getOS)
+        GOARCH=$(getArch)
+        EXT=$(getExt)
+
+        # create and produce the download mask
+        echo "mask=task_${GOOS}_${GOARCH}.${EXT}" >> "$GITHUB_OUTPUT"
+      id: download-mask
+
+    - name: Download Release Artifact
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        # redeclare tag
+        tag="${{ inputs.task_version }}"
+
+        # redeclare mask
+        mask="${{ steps.download-mask.outputs.mask }}"
+
+        # define the artifact download file path
+        artifact_path="${{ inputs.bin_dir }}/task"
+
+        # download the release artifact
+        gh release download "${tag}" \
+          --repo "go-task/task" \
+          --pattern "${mask}" \
+          --output "${{ inputs.bin_dir }}/task" \
+          --clobber
+
+        # produce the artifact's downloaded path
+        echo "artifact_path=${artifact_path}" >> "$GITHUB_OUTPUT"
+      id: download-artifact
+
+    # For Windows, we simply extract the .zip file and add the directory to
+    # PATH.
+    - name: Install Task from Artifact (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # redeclare the artifact path
+        $artifactPath = "${{ steps.download-artifact.outputs.artifact_path }}"
+
+        # get artifact parent directory
+        $artifactParentDir = Split-Path -Path $artifactPath -Parent
+
+        # define decompression params
+        $params = @{
+          Path            = $artifactPath
+          DestinationPath = $artifactParentDir
+          Force           = $true
+        }
+
+        # decompress the archive
+        Decompress-Archive @params
+
+        # add the directory path to GITHUB_PATH
+        Add-Content -Path $env:GITHUB_PATH -Value "${artifactParentDir}"
+
+    # For Mac, we untar it and add the directory to GITHUB_PATH
+    - name: Install Task from Artifact (Mac)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        echo "::error::MacOS runner support is not yet implemented\!"
+        exit 1
+
+    # For Linux, we install with the appropriate package manager
+    - name: Install Task from Artifact (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        # redeclare artifact path
+        artifact_path="${{ steps.download-artifact.outputs.artifact_path }}"
+
+        # proceed with install depending on OS package manager
+        # install with dpkg
+        if which dpkg >/dev/null 2>&1; then
+          sudo dpkg -i "${artifact_path}"
+        elif which rpm >/dev/null 2>&1; then
+          sudo rpm -i "${artifact_path}"
+        fi
