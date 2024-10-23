@@ -97,7 +97,7 @@ func compileFile(inFile *srcFile, outFile *os.File, emt *formatter.Formatter) {
 	set := typeset.Typeset(tree)
 
 	// Validate
-	validate.Validate(&set)
+	// validate.Validate(&set)
 
 	// Emit
 	compiled := emit.Emit(set, inFile.Path, inFile.Import, emt)
