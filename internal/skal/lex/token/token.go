@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strconv"
 
-	"github.com/illbjorn/skal/pkg/fstr"
+	"github.com/illbjorn/fstr"
 )
 
 var itoa = strconv.Itoa
@@ -98,15 +98,13 @@ func (tk *token) Value() string { return tk.value.String() }
 
 // fmt.Stringer
 func (tk *token) String() string {
-	return fstr.PairsStrip(
-		`
-File    : {File}
+	return fstr.Pairs(
+		`File    : {File}
 Type    : {type}
 Start X : {sx}
 Start Y : {sy}
 End X   : {ex}
-End Y   : {ey}
-`,
+End Y   : {ey}`,
 		"File", tk.file,
 		"type", tk._type,
 		"sx", itoa(tk.Start.Col),

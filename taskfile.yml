@@ -129,12 +129,15 @@ tasks:
   #                                                                            #
   ##############################################################################
   dev: &task-dev
+    aliases: [d]
     desc: Performs a build and runs the compiler against a Skal source file.
     cmds:
       - clear
+      # DEV_SRC and DEV_DST should be provided by your local `.env` file.
       - go run '{{ .PATH_DIR_SKAL_MAIN }}' c '{{ .DEV_SRC }}' '{{ .DEV_DST }}'
 
   devw:
+    aliases: [dw]
     desc: Performs a build and runs the compiler against a Skal source file, in watch mode.
     sources:
       - '**/*.go'

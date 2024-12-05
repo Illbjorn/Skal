@@ -117,7 +117,7 @@ func Parse(tc *token.Collection, root, n *Node) *Node {
 }
 
 func parseDefer(tc *token.Collection) *Node {
-	ndefer := new(Node).SetType(token.Defer).SetTokenOnly(tc.AssertAdvT(token.Defer)).AddChild(
+	ndefer := new(Node).SetType(token.Defer).SetTokenOnly(tc.AdvT(token.Defer)).AddChild(
 		parseStatement(tc, nil),
 	)
 
@@ -125,10 +125,10 @@ func parseDefer(tc *token.Collection) *Node {
 }
 
 func parseExtern(tc *token.Collection) *Node {
-	extern := new(Node).SetType(token.Extern).SetTokenOnly(tc.AssertAdvT(token.Extern))
+	extern := new(Node).SetType(token.Extern).SetTokenOnly(tc.AdvT(token.Extern))
 
 	// '{'
-	tc.AssertAdvT(token.BraceOpen)
+	tc.AdvT(token.BraceOpen)
 
 	// Reference
 	for !tc.NTT(token.BraceClose) {
@@ -138,7 +138,7 @@ func parseExtern(tc *token.Collection) *Node {
 		for {
 			// ID
 			external.AddChild(
-				new(Node).SetToken(tc.AssertAdvT(token.ID)),
+				new(Node).SetToken(tc.AdvT(token.ID)),
 			)
 
 			// '.'
@@ -148,11 +148,11 @@ func parseExtern(tc *token.Collection) *Node {
 		}
 
 		// 'as'
-		tc.AssertAdvT(token.As)
+		tc.AdvT(token.As)
 
 		// Alias
 		external.AddChild(
-			new(Node).SetType(token.As).SetToken(tc.AssertAdvT(token.ID)),
+			new(Node).SetType(token.As).SetToken(tc.AdvT(token.ID)),
 		)
 
 		extern.AddChild(
@@ -161,7 +161,7 @@ func parseExtern(tc *token.Collection) *Node {
 	}
 
 	// '}'
-	tc.AssertAdvT(token.BraceClose)
+	tc.AdvT(token.BraceClose)
 
 	return extern
 }
@@ -170,15 +170,15 @@ func parseStruct(tc *token.Collection) *Node {
 	nstruct := new(Node).SetType(token.Struct).SetTokenOnly(tc.LA())
 
 	// 'struct'
-	tc.AssertAdvT(token.Struct)
+	tc.AdvT(token.Struct)
 
 	// ID
 	nstruct.AddChild(
-		new(Node).SetToken(tc.AssertAdvT(token.ID)),
+		new(Node).SetToken(tc.AdvT(token.ID)),
 	)
 
 	// '{'
-	tc.AssertAdvT(token.BraceOpen)
+	tc.AdvT(token.BraceOpen)
 
 	// Fields
 	nstruct.AddChildren(
@@ -186,7 +186,7 @@ func parseStruct(tc *token.Collection) *Node {
 	)
 
 	// '}'
-	tc.AssertAdvT(token.BraceClose)
+	tc.AdvT(token.BraceClose)
 
 	return nstruct
 }
@@ -223,11 +223,11 @@ func parseMethod(tc *token.Collection) *Node {
 
 	// ID | 'new'
 	fn.AddChild(
-		new(Node).SetToken(tc.AssertAdvOneOf(token.ID, token.New)),
+		new(Node).SetToken(tc.AdvOneOfT(token.ID, token.New)),
 	)
 
 	// '('
-	tc.AssertAdvT(token.ParenOpen)
+	tc.AdvT(token.ParenOpen)
 
 	// Args
 	fn.AddChildren(
@@ -235,10 +235,10 @@ func parseMethod(tc *token.Collection) *Node {
 	)
 
 	// ')'
-	tc.AssertAdvT(token.ParenClose)
+	tc.AdvT(token.ParenClose)
 
 	// '{'
-	tc.AssertAdvT(token.BraceOpen)
+	tc.AdvT(token.BraceOpen)
 
 	// Block
 	fn.AddChild(
@@ -246,7 +246,7 @@ func parseMethod(tc *token.Collection) *Node {
 	)
 
 	// '}'
-	tc.AssertAdvT(token.BraceClose)
+	tc.AdvT(token.BraceClose)
 
 	return fn
 }
@@ -255,15 +255,15 @@ func parseEnum(tc *token.Collection) *Node {
 	enum := new(Node).SetType(token.Enum).SetTokenOnly(tc.LA())
 
 	// 'enum'
-	tc.AssertAdvT(token.Enum)
+	tc.AdvT(token.Enum)
 
 	// ID
 	enum.AddChild(
-		new(Node).SetToken(tc.AssertAdvT(token.ID)),
+		new(Node).SetToken(tc.AdvT(token.ID)),
 	)
 
 	// '{'
-	tc.AssertAdvT(token.BraceOpen)
+	tc.AdvT(token.BraceOpen)
 
 	// Members
 	enum.AddChildren(
@@ -271,7 +271,7 @@ func parseEnum(tc *token.Collection) *Node {
 	)
 
 	// '}'
-	tc.AssertAdvT(token.BraceClose)
+	tc.AdvT(token.BraceClose)
 
 	return enum
 }
@@ -288,16 +288,16 @@ func parseEnumMembers(tc *token.Collection) []*Node {
 
 		// ID
 		member.AddChild(
-			new(Node).SetToken(tc.AssertAdvT(token.ID)),
+			new(Node).SetToken(tc.AdvT(token.ID)),
 		)
 
 		// '='
-		tc.AssertAdvT(token.EQ)
+		tc.AdvT(token.EQ)
 
 		// Value
 		member.AddChild(
 			new(Node).SetToken(
-				tc.AssertAdvOneOf(
+				tc.AdvOneOfT(
 					token.IntL,
 					token.BoolL,
 					token.StrL)),
@@ -311,15 +311,15 @@ func parseFn(tc *token.Collection) *Node {
 	fn := new(Node).SetType(token.Fn).SetTokenOnly(tc.LA())
 
 	// 'fn'
-	tc.AssertAdvT(token.Fn)
+	tc.AdvT(token.Fn)
 
 	// ID
 	fn.AddChild(
-		new(Node).SetToken(tc.AssertAdvT(token.ID)),
+		new(Node).SetToken(tc.AdvT(token.ID)),
 	)
 
 	// '('
-	tc.AssertAdvT(token.ParenOpen)
+	tc.AdvT(token.ParenOpen)
 
 	// Args
 	fn.AddChildren(
@@ -327,7 +327,7 @@ func parseFn(tc *token.Collection) *Node {
 	)
 
 	// ')'
-	tc.AssertAdvT(token.ParenClose)
+	tc.AdvT(token.ParenClose)
 
 	// OPTIONAL: Return type hint.
 	if tk, ok := tc.AdvIf(token.Fn, token.Str, token.Int, token.Bool, token.ID); ok {
@@ -337,7 +337,7 @@ func parseFn(tc *token.Collection) *Node {
 	}
 
 	// '{'
-	tc.AssertAdvT(token.BraceOpen)
+	tc.AdvT(token.BraceOpen)
 
 	// Block
 	fn.AddChild(
@@ -345,7 +345,7 @@ func parseFn(tc *token.Collection) *Node {
 	)
 
 	// '}'
-	tc.AssertAdvT(token.BraceClose)
+	tc.AdvT(token.BraceClose)
 
 	return fn
 }
@@ -369,13 +369,13 @@ func parseFnArgs(tc *token.Collection) []*Node {
 
 		// ID
 		arg.AddChild(
-			new(Node).SetToken(tc.AssertAdvT(token.ID)),
+			new(Node).SetToken(tc.AdvT(token.ID)),
 		)
 
 		// OPTIONAL: Type hint.
 		if _, ok := tc.AdvIf(token.Colon); ok {
 			// Type token.
-			tk := tc.AssertAdvOneOf(
+			tk := tc.AdvOneOfT(
 				token.ID,
 				token.Str,
 				token.Int,
@@ -401,7 +401,7 @@ func parseAnonFn(tc *token.Collection) *Node {
 	fn := new(Node).SetType(token.Fn).SetTokenOnly(tc.LA())
 
 	// '('
-	tc.AssertAdvT(token.ParenOpen)
+	tc.AdvT(token.ParenOpen)
 
 	// OPTIONAL: Args
 	if !tc.NTT(token.ParenClose) {
@@ -413,7 +413,7 @@ func parseAnonFn(tc *token.Collection) *Node {
 
 			// ID
 			arg.AddChild(
-				new(Node).SetToken(tc.AssertAdvT(token.ID)),
+				new(Node).SetToken(tc.AdvT(token.ID)),
 			)
 
 			args = append(args, arg)
@@ -430,10 +430,10 @@ func parseAnonFn(tc *token.Collection) *Node {
 	}
 
 	// ')'
-	tc.AssertAdvT(token.ParenClose)
+	tc.AdvT(token.ParenClose)
 
 	// '->'
-	tc.AssertAdvT(token.Arrow)
+	tc.AdvT(token.Arrow)
 
 	// Value
 	fn.AddChildren(
@@ -444,7 +444,7 @@ func parseAnonFn(tc *token.Collection) *Node {
 }
 
 func parseReturnStatement(tc *token.Collection) *Node {
-	ret := new(Node).SetToken(tc.AssertAdvT(token.Ret))
+	ret := new(Node).SetToken(tc.AdvT(token.Ret))
 
 	// Bare return.
 	if tc.NTT(token.BraceClose) {
@@ -463,7 +463,7 @@ func parseIf(tc *token.Collection) *Node {
 	nif := new(Node).SetType(token.If).SetTokenOnly(tc.LA())
 
 	// 'if'
-	tc.AssertAdvT(token.If)
+	tc.AdvT(token.If)
 
 	// Conditions
 	nif.AddChild(
@@ -471,7 +471,7 @@ func parseIf(tc *token.Collection) *Node {
 	)
 
 	// '{'
-	tc.AssertAdvT(token.BraceOpen)
+	tc.AdvT(token.BraceOpen)
 
 	// Block
 	nif.AddChild(
@@ -479,7 +479,7 @@ func parseIf(tc *token.Collection) *Node {
 	)
 
 	// '}'
-	tc.AssertAdvT(token.BraceClose)
+	tc.AdvT(token.BraceClose)
 
 	// Elif+
 	nif.AddChildren(
@@ -504,7 +504,7 @@ func parseElifs(tc *token.Collection) []*Node {
 		elif := new(Node).SetType(token.Elif).SetTokenOnly(tc.LA())
 
 		// 'elif'
-		tc.AssertAdvT(token.Elif)
+		tc.AdvT(token.Elif)
 
 		// Conditions.
 		elif.AddChild(
@@ -512,7 +512,7 @@ func parseElifs(tc *token.Collection) []*Node {
 		)
 
 		// '{'
-		tc.AssertAdvT(token.BraceOpen)
+		tc.AdvT(token.BraceOpen)
 
 		// Block
 		elif.AddChild(
@@ -520,7 +520,7 @@ func parseElifs(tc *token.Collection) []*Node {
 		)
 
 		// '}'
-		tc.AssertAdvT(token.BraceClose)
+		tc.AdvT(token.BraceClose)
 
 		elifs = append(elifs, elif)
 		if tc.LA().Type() != token.Elif {
@@ -537,10 +537,10 @@ func parseElse(tc *token.Collection) *Node {
 	nelse := new(Node).SetType(token.Else)
 
 	// 'else'
-	tc.AssertAdvT(token.Else)
+	tc.AdvT(token.Else)
 
 	// '{'
-	tc.AssertAdvT(token.BraceOpen)
+	tc.AdvT(token.BraceOpen)
 
 	// Block
 	nelse.AddChild(
@@ -548,7 +548,7 @@ func parseElse(tc *token.Collection) *Node {
 	)
 
 	// '}'
-	tc.AssertAdvT(token.BraceClose)
+	tc.AdvT(token.BraceClose)
 
 	return nelse
 }
@@ -564,7 +564,7 @@ func parseBind(tc *token.Collection) *Node {
 	bind := new(Node).SetType(token.Bind).SetTokenOnly(tc.LA())
 
 	// 'let'
-	tc.AssertAdvT(token.Let)
+	tc.AdvT(token.Let)
 
 	// Reference
 	// Multiple binds can be performed in a single line, so we look for one or
@@ -586,7 +586,7 @@ func parseBind(tc *token.Collection) *Node {
 	}
 
 	// '='
-	tc.AssertAdvT(token.EQ)
+	tc.AdvT(token.EQ)
 
 	// Value
 	bind.AddChildren(
@@ -605,7 +605,7 @@ func parseRebind(tc *token.Collection) *Node {
 	)
 
 	// '='
-	tc.AssertAdvT(token.EQ)
+	tc.AdvT(token.EQ)
 
 	// Value
 	reb.AddChildren(
@@ -619,7 +619,7 @@ func parseFor(tc *token.Collection) *Node {
 	nfor := new(Node).SetType(token.For).SetTokenOnly(tc.LA())
 
 	// 'for'
-	tc.AssertAdvT(token.For)
+	tc.AdvT(token.For)
 
 	// Iterators
 	nfor.AddChildren(
@@ -629,7 +629,7 @@ func parseFor(tc *token.Collection) *Node {
 	// '=' | 'in'
 	nfor.AddChild(
 		new(Node).SetType(token.ForType).SetToken(
-			tc.AssertAdvOneOf(
+			tc.AdvOneOfT(
 				token.EQ,
 				token.In)),
 	)
@@ -640,7 +640,7 @@ func parseFor(tc *token.Collection) *Node {
 	)
 
 	// '{'
-	tc.AssertAdvT(token.BraceOpen)
+	tc.AdvT(token.BraceOpen)
 
 	// Block
 	nfor.AddChild(
@@ -648,7 +648,7 @@ func parseFor(tc *token.Collection) *Node {
 	)
 
 	// '}'
-	tc.AssertAdvT(token.BraceClose)
+	tc.AdvT(token.BraceClose)
 
 	return nfor
 }
@@ -817,7 +817,7 @@ func parseCallArgs(tc *token.Collection) []*Node {
 	var args []*Node
 
 	// '('
-	tc.AssertAdvT(token.ParenOpen)
+	tc.AdvT(token.ParenOpen)
 
 	// Args
 	for {
@@ -845,7 +845,7 @@ func parseCallArgs(tc *token.Collection) []*Node {
 	}
 
 	// ')'
-	tc.AssertAdvT(token.ParenClose)
+	tc.AdvT(token.ParenClose)
 
 	return args
 }
@@ -855,7 +855,7 @@ func parseRef(tc *token.Collection) *Node {
 
 	for {
 		ref.AddChild(
-			new(Node).SetToken(tc.AssertAdvOneOf(token.This, token.ID)),
+			new(Node).SetToken(tc.AdvOneOfT(token.This, token.ID)),
 		)
 
 		if tc.NTT(token.BrackOpen) {
@@ -874,7 +874,7 @@ func parseIndex(tc *token.Collection) *Node {
 	index := new(Node).SetType(token.Index).SetTokenOnly(tc.LA())
 
 	// '['
-	tc.AssertAdvT(token.BrackOpen)
+	tc.AdvT(token.BrackOpen)
 
 	for {
 		if tc.LA().Type() == token.BrackClose {
@@ -882,7 +882,7 @@ func parseIndex(tc *token.Collection) *Node {
 		}
 
 		// 'this' | IntL | StrL | BoolL | ID | '.'
-		tk := tc.AssertAdvOneOf(
+		tk := tc.AdvOneOfT(
 			token.This,
 			token.IntL,
 			token.StrL,
@@ -901,7 +901,7 @@ func parseIndex(tc *token.Collection) *Node {
 	}
 
 	// ']'
-	tc.AssertAdvT(token.BrackClose)
+	tc.AdvT(token.BrackClose)
 
 	return index
 }
@@ -977,38 +977,38 @@ func parseValue(tc *token.Collection) []*Node {
 		// '[]'
 		case token.List:
 			value.AddChild(
-				new(Node).SetType(token.List).SetTokenOnly(tc.AssertAdvT(token.List)),
+				new(Node).SetType(token.List).SetTokenOnly(tc.AdvT(token.List)),
 			)
 
 		// List Literal
 		case token.BrackOpen:
 			list := new(Node).SetTokenOnly(tc.LA()).SetType(token.ListL)
 
-	// '['
-	tc.AssertAdvT(token.BrackOpen)
+			// '['
+			tc.AdvT(token.BrackOpen)
 
-	for !tc.NTT(token.BrackClose) {
-		switch tc.LA().Type() {
-		// StrL | IntL
-		case token.StrL, token.IntL:
-			list.AddChild(
-				new(Node).SetToken(tc.Adv()),
-			)
+			for !tc.NTT(token.BrackClose) {
+				switch tc.LA().Type() {
+				// StrL | IntL
+				case token.StrL, token.IntL:
+					list.AddChild(
+						new(Node).SetToken(tc.Adv()),
+					)
 
-		default:
-			sklog.UnexpectedType(
-				"parse list literal Value",
-				tc.LA().Type())
-		}
+				default:
+					sklog.UnexpectedType(
+						"parse list literal Value",
+						tc.LA().Type())
+				}
 
-		// ','
-		if _, ok := tc.AdvIf(token.Comma); !ok {
-			break
-		}
-	}
+				// ','
+				if _, ok := tc.AdvIf(token.Comma); !ok {
+					break
+				}
+			}
 
-	// ']'
-	tc.AssertAdvT(token.BrackClose)
+			// ']'
+			tc.AdvT(token.BrackClose)
 			value.AddChild(list)
 
 		default:
@@ -1040,7 +1040,7 @@ func parseValue(tc *token.Collection) []*Node {
 func parseValueGroup(tc *token.Collection) *Node {
 	group := new(Node).SetType(token.ValueGroup).SetTokenOnly(tc.LA())
 	// '('
-	tc.AssertAdvT(token.ParenOpen)
+	tc.AdvT(token.ParenOpen)
 
 	// Value
 	group.AddChildren(
@@ -1048,7 +1048,7 @@ func parseValueGroup(tc *token.Collection) *Node {
 	)
 
 	// ')'
-	tc.AssertAdvT(token.ParenClose)
+	tc.AdvT(token.ParenClose)
 
 	return group
 }

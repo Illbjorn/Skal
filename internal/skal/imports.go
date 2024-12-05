@@ -9,9 +9,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/illbjorn/fstr"
 	"github.com/illbjorn/skal/internal/skal/lex/token"
 	"github.com/illbjorn/skal/internal/skal/sklog"
-	"github.com/illbjorn/skal/pkg/fstr"
 )
 
 func getImports(j *job) *job {

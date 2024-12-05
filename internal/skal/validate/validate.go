@@ -5,11 +5,11 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/illbjorn/fstr"
 	"github.com/illbjorn/skal/internal/skal/lex/token"
 	"github.com/illbjorn/skal/internal/skal/lua"
 	"github.com/illbjorn/skal/internal/skal/sklog"
 	"github.com/illbjorn/skal/internal/skal/typeset"
-	"github.com/illbjorn/skal/pkg/fstr"
 )
 
 var sprintf = fmt.Sprintf

@@ -5,9 +5,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/illbjorn/fstr"
 	"github.com/illbjorn/skal/internal/skal/lex/token"
 	"github.com/illbjorn/skal/internal/skal/sklog"
-	"github.com/illbjorn/skal/pkg/fstr"
 )
 
 func NewNode(tc *token.Collection, tk token.Token) *Node {
@@ -38,14 +38,12 @@ type Node struct {
  * Stringer Support
  *----------------------------------------------------------------------------*/
 
-var tmplNode = `
-Node Value    : {value}
+var tmplNode = `Node Value    : {value}
 Node Type     : {type}
-Node Children : {len}
-`
+Node Children : {len}`
 
 func (node Node) String() string {
-	return fstr.PairsStrip(
+	return fstr.Pairs(
 		tmplNode,
 		"value", node.Value,
 		"type", node.Type,

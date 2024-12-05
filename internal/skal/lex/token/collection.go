@@ -121,30 +121,29 @@ func (tc *Collection) AdvIf(tts ...string) (Token, bool) {
 	return NewToken(tc), false
 }
 
-// AssertAdvT advances forward expecting a single provided Token type. If the Token
+// AdvT advances forward expecting a single provided Token type. If the Token
 // encountered is not as specified, a panic occurs.
-func (tc *Collection) AssertAdvT(tt string) Token {
+func (tc *Collection) AdvT(tt string) Token {
 	// Get the next token.
 	tk := tc.Adv()
 
 	// Confirm we have a match.
 	if tk.Type() != tt {
-		assertErrorF(
+		assertError(
 			tk.SrcLine(),
 			tk,
-			"Expected {expected}. Found '{found}'.",
-			"expected", tt,
-			"found", tk.Type())
+			sprintf("Expected %s, found %s.", tt, tk.Type()),
+		)
 	}
 
 	return tk
 }
 
-// AssertAdvOneOf iterates provided TokenTypes, returning the first matching Token
+// AdvOneOfT iterates provided TokenTypes, returning the first matching Token
 // found.
 //
 // If an expected type is not found, an error is thrown.
-func (tc *Collection) AssertAdvOneOf(tts ...string) Token {
+func (tc *Collection) AdvOneOfT(tts ...string) Token {
 	// Get the next token.
 	tk := tc.Adv()
 
@@ -163,12 +162,11 @@ func (tc *Collection) AssertAdvOneOf(tts ...string) Token {
 	// Prepare the 'expected' string.
 	expected := strings.Join(tts, ", ")
 
-	assertErrorF(
+	assertError(
 		tk.SrcLine(),
 		tk,
-		"Expected: {expected}. Found: {found}.",
-		"expected", expected,
-		"found", tk.Type())
+		sprintf("Expected %s, found %s", expected, tk.Type()),
+	)
 
 	return NewToken(tc)
 }

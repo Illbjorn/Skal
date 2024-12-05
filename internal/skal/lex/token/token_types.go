@@ -1,13 +1,16 @@
 package token
 
-//goland:noinspection GoUnusedConst,GoUnusedConst,GoUnusedConst,GoUnusedConst,GoUnusedConst,GoUnusedConst,GoUnusedConst
+// type Type uint8
+
 const (
-	// ////////////////////////////// TOKEN VALUES ////////////////////////////////
+	//////////////////////////////// TOKEN VALUES ////////////////////////////////
 	//                                                                          //
 	//                        These are parsed literally.                       //
 	//                                                                          //
-	// ////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//
 	// Keywords
+	// This Type = iota
 	This   = "this"   // Struct instance self-reference.
 	Pub    = "pub"    // Public modifier.
 	New    = "new"    // Struct constructor.
@@ -84,11 +87,11 @@ const (
 	Comma      = ","  // Punctuation, separator
 	Arrow      = "->" // Anonymous function
 
-	// ////////////////////////// CATEGORIZATION VALUES ///////////////////////////
+	//////////////////////////// CATEGORIZATION VALUES ///////////////////////////
 	//                                                                          //
-	// These only serve to indicate a broader grouping associated with the token.//
+	//These only serve to indicate a broader grouping associated with the token.//
 	//                                                                          //
-	// ////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
 
 	// Type System
 	TypeHint = "type hint"
