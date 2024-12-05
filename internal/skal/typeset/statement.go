@@ -1,6 +1,8 @@
 package typeset
 
 import (
+	"fmt"
+
 	"github.com/illbjorn/skal/internal/skal/lex/token"
 	"github.com/illbjorn/skal/internal/skal/parse"
 	"github.com/illbjorn/skal/internal/skal/sklog"
@@ -22,8 +24,8 @@ type Statement struct {
 	Fn       *Fn
 	Bind     *Bind
 	Op       string
-	StmtType string
 	Values   []*Value
+	StmtType token.Type
 }
 
 func buildStatement(n node, p SkalType) Statement {
@@ -82,12 +84,19 @@ func buildStatement(n node, p SkalType) Statement {
 			stmt.StmtType = token.Defer
 			stmt.AddDefer(&def)
 
+		case token.Ref:
+			fmt.Println(child.Children)
+
 		default:
-			sklog.UnexpectedType("typeset statement node", child.Type)
+			sklog.UnexpectedType("typeset statement node", child.Type.String())
 		}
 	}
 
-	if stmt.StmtType == "" {
+	if n.Token != nil {
+		fmt.Println(n.Token.File())
+	}
+
+	if stmt.StmtType == 0 {
 		sklog.CFatal("Statement fell through with no type.")
 	}
 
@@ -105,7 +114,7 @@ func buildBlock(n node, p SkalType) []*Statement {
 			block = append(block, &stmt)
 
 		default:
-			sklog.UnexpectedType("typeset block node", child.Type)
+			sklog.UnexpectedType("typeset block node", child.Type.String())
 		}
 	}
 

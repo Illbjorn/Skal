@@ -1,5 +1,7 @@
 package typeset
 
+import "github.com/illbjorn/skal/internal/skal/lex/token"
+
 func NewTypeSet() TypeSet {
 	return TypeSet{
 		Members: make([]Type, 0),
@@ -11,7 +13,7 @@ type TypeSet struct {
 }
 
 // Add adds a given set of instance information to the members slice.
-func (c *TypeSet) Add(v any, id string, t string) {
+func (c *TypeSet) Add(v any, id string, t token.Type) {
 	if v == nil {
 		return
 	}
@@ -21,7 +23,7 @@ func (c *TypeSet) Add(v any, id string, t string) {
 }
 
 type Type struct {
-	ID    string
 	Value any
-	Type  string
+	ID    string
+	Type  token.Type
 }

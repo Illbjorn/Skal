@@ -100,33 +100,56 @@ func eatWord(tk token.Token, l *lexer) token.Token {
 	}
 }
 
-func classifyKeyword(s string) string {
+func classifyKeyword(s string) token.Type {
 	switch s {
-	// Keywords
-	case token.New,
-		token.Pub,
-		token.Let,
-		token.In,
-		token.For,
-		token.If,
-		token.Elif,
-		token.Else,
-		token.Ret,
-		token.This,
-		token.Fn,
-		token.Enum,
-		token.Struct,
-		token.True,
-		token.False,
-		token.Import,
-		token.Defer,
-		token.Extern,
-		token.As,
-		token.Nil,
-		token.Int,
-		token.Bool,
-		token.Str:
-		return s
+	case token.New.String():
+		return token.New
+	case token.New.String():
+		return token.New
+	case token.Pub.String():
+		return token.Pub
+	case token.Let.String():
+		return token.Let
+	case token.In.String():
+		return token.In
+	case token.For.String():
+		return token.For
+	case token.If.String():
+		return token.If
+	case token.Elif.String():
+		return token.Elif
+	case token.Else.String():
+		return token.Else
+	case token.Ret.String():
+		return token.Ret
+	case token.This.String():
+		return token.This
+	case token.Fn.String():
+		return token.Fn
+	case token.Enum.String():
+		return token.Enum
+	case token.Struct.String():
+		return token.Struct
+	case token.True.String():
+		return token.True
+	case token.False.String():
+		return token.False
+	case token.Import.String():
+		return token.Import
+	case token.Defer.String():
+		return token.Defer
+	case token.Extern.String():
+		return token.Extern
+	case token.As.String():
+		return token.As
+	case token.Nil.String():
+		return token.Nil
+	case token.Int.String():
+		return token.Int
+	case token.Bool.String():
+		return token.Bool
+	case token.Str.String():
+		return token.Str
 	// ID
 	default:
 		return token.ID
@@ -178,15 +201,15 @@ func eatSymbol(tk token.Token, l *lexer) token.Token {
 		// --------------------------------------------------------------------------
 		// Multi-byte symbols.
 		// '->'
-		case token.Arrow:
+		case token.Arrow.String():
 			tk.SetType(token.Arrow)
 
 		// '...'
-		case token.Spread:
+		case token.Spread.String():
 			tk.SetType(token.Spread)
 
 		// '..'
-		case token.Concat:
+		case token.Concat.String():
 			// '...'
 			if l.LA() == '.' {
 				break
@@ -196,60 +219,79 @@ func eatSymbol(tk token.Token, l *lexer) token.Token {
 			tk.SetType(token.Concat)
 
 		// '[]'
-		case token.List:
-			tk.SetType(tk.Value())
+		case token.List.String():
+			tk.SetType(token.List)
 
-		// '>=' | '<=' | '!=' | '=='
-		case token.GE, token.LE, token.NE, token.EQEQ:
-			tk.SetType(tk.Value())
+		// '>='
+		case token.GE.String():
+			tk.SetType(token.GE)
 
-		// '&&' | '||'
-		case token.And, token.Or:
-			tk.SetType(tk.Value())
+		// '<='
+		case token.LE.String():
+			tk.SetType(token.LE)
+
+		// '!='
+		case token.NE.String():
+			tk.SetType(token.NE)
+
+		// '=='
+		case token.EQEQ.String():
+			tk.SetType(token.EQEQ)
+
+		// '&&'
+		case token.And.String():
+			tk.SetType(token.And)
+
+		// '||'
+		case token.Or.String():
+			tk.SetType(token.Or)
 
 		// '#'
-		case token.Comment:
+		case token.Comment.String():
 			eatComment(l)
 			return nil
 
 		// --------------------------------------------------------------------------
 		// Exclusively single-byte symbols.
 		// '(' | ')'
-		case token.ParenOpen, token.ParenClose:
-			tk.SetType(tk.Value())
+		case token.ParenOpen.String():
+			tk.SetType(token.ParenOpen)
+
+		case token.ParenClose.String():
+			tk.SetType(token.ParenClose)
 
 		// '{'
-		case token.BraceOpen:
-			tk.SetType(tk.Value())
+		case token.BraceOpen.String():
+			tk.SetType(token.BraceOpen)
 
 		// '}'
-		case token.BraceClose:
+		case token.BraceClose.String():
 			tk.SetType(token.BraceClose)
 
 		// '+'
-		case token.Plus:
+		case token.Plus.String():
 			tk.SetType(token.Plus)
 
 		// '*'
-		case token.Mult:
+		case token.Mult.String():
 			tk.SetType(token.Mult)
 
 		// ','
-		case token.Comma:
+		case token.Comma.String():
 			tk.SetType(token.Comma)
 
 		// ';'
-		case token.SemiColon:
+		case token.SemiColon.String():
 			tk.SetType(token.SemiColon)
 
 		// ']'
 		// The open bracket is further down since it can indicate an empty list
 		// literal ('[]').
-		case token.BrackClose:
-			tk.SetType(tk.Value())
+		case token.BrackClose.String():
+			tk.SetType(token.BrackClose)
 
 		// ':'
-		case token.Colon:
+		case token.Colon.String():
 			tk.SetType(token.Colon)
 
 		// --------------------------------------------------------------------------
@@ -265,7 +307,7 @@ func eatSymbol(tk token.Token, l *lexer) token.Token {
 		// --------------------------------------------------------------------------
 		// Maybe multi-byte symbols.
 		// '-' | '->'
-		case token.Minus:
+		case token.Minus.String():
 			// '->'
 			if l.LA() == '>' {
 				break
@@ -273,11 +315,11 @@ func eatSymbol(tk token.Token, l *lexer) token.Token {
 			tk.SetType(token.Minus)
 
 		// '/' | '//'
-		case token.Div:
+		case token.Div.String():
 			tk.SetType(token.Div)
 
 		// '>' | '>='
-		case token.GT:
+		case token.GT.String():
 			// '>='
 			if l.LA() == '=' {
 				break
@@ -285,7 +327,7 @@ func eatSymbol(tk token.Token, l *lexer) token.Token {
 			tk.SetType(token.GT)
 
 		// '<' | '<='
-		case token.LT:
+		case token.LT.String():
 			// '<='
 			if l.LA() == '=' {
 				break
@@ -293,7 +335,7 @@ func eatSymbol(tk token.Token, l *lexer) token.Token {
 			tk.SetType(token.LT)
 
 		// '!' | '!='
-		case token.Not:
+		case token.Not.String():
 			// '!='
 			if l.LA() == '=' {
 				break
@@ -302,7 +344,7 @@ func eatSymbol(tk token.Token, l *lexer) token.Token {
 			tk.SetType(token.Not)
 
 		// '.' | '..' | '...'
-		case token.Dot:
+		case token.Dot.String():
 			// '..' | '...'
 			if l.LA() == '.' {
 				break
@@ -311,7 +353,7 @@ func eatSymbol(tk token.Token, l *lexer) token.Token {
 			tk.SetType(token.Dot)
 
 		// '==' | '='
-		case token.EQ:
+		case token.EQ.String():
 			// '=='
 			if l.LA() == '=' {
 				break
@@ -321,7 +363,7 @@ func eatSymbol(tk token.Token, l *lexer) token.Token {
 			tk.SetType(token.EQ)
 
 		// '[' | '[]'
-		case token.BrackOpen:
+		case token.BrackOpen.String():
 			// '[]'
 			if l.LA() == ']' {
 				break
@@ -336,7 +378,7 @@ func eatSymbol(tk token.Token, l *lexer) token.Token {
 			)
 		}
 
-		if tk.Type() != "" {
+		if tk.Type() > 0 {
 			return tk
 		}
 	}

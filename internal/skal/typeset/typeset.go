@@ -22,7 +22,7 @@ func Typeset(tree node) TypeSet {
 	return ctc
 }
 
-func typeset(n node) (any, string, string) {
+func typeset(n node) (any, string, token.Type) {
 	var pub bool
 	for _, child := range n.Children {
 		switch child.Type {
@@ -89,9 +89,9 @@ func typeset(n node) (any, string, string) {
 			return extern, "", token.Extern
 
 		default:
-			sklog.UnexpectedType("typeset node", child.Type)
+			sklog.UnexpectedType("typeset node", child.Type.String())
 		}
 	}
 
-	return nil, "", ""
+	return nil, "", 0
 }

@@ -64,11 +64,11 @@ func buildFn(n node, p SkalType) Fn {
 			}
 
 		// Type hint.
-		case token.TypeHint:
-			fn.SetType(child.Value)
+		// case token.TypeHint:
+		// fn.SetType(child.Value)
 
 		default:
-			sklog.UnexpectedType("typeset fn node", child.Type)
+			sklog.UnexpectedType("typeset fn node", child.Type.String())
 		}
 	}
 
@@ -89,11 +89,11 @@ func buildFnArg(n node, p SkalType) FnArg {
 			arg.Vararg = true
 
 		// Type Hint
-		case token.TypeHint:
-			arg.SetType(child.Value)
+		// case token.TypeHint:
+		// 	arg.SetType(child.Value)
 
 		default:
-			sklog.UnexpectedType("typeset fn arg node", child.Type)
+			sklog.UnexpectedType("typeset fn arg node", child.Type.String())
 		}
 	}
 

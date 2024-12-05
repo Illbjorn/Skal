@@ -43,7 +43,7 @@ func buildEnum(n node) Enum {
 			e.MemberType = e.Members[0].ValueType
 
 		default:
-			sklog.UnexpectedType("typeset enum", child.Type)
+			sklog.UnexpectedType("typeset enum", child.Type.String())
 		}
 	}
 
@@ -61,11 +61,11 @@ func buildEnumMember(n node, p SkalType) EnumMember {
 
 		// String Literal | Int Literal | Bool Literal
 		case token.StrL, token.IntL, token.BoolL:
-			m.ValueType = child.Type
+			m.ValueType = child.Type.String()
 			m.Value = child.Value
 
 		default:
-			sklog.UnexpectedType("typeset enum member", child.Type)
+			sklog.UnexpectedType("typeset enum member", child.Type.String())
 		}
 	}
 

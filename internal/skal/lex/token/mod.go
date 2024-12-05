@@ -1,7 +1,12 @@
 package token
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 var (
 	sprintf = fmt.Sprintf
+
+	join = strings.Join
 )

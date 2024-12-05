@@ -45,7 +45,7 @@ func buildStruct(n node) Struct {
 			s.Methods = append(s.Methods, &fn)
 
 		default:
-			sklog.UnexpectedType("typeset struct node", child.Type)
+			sklog.UnexpectedType("typeset struct node", child.Type.String())
 		}
 	}
 
@@ -65,7 +65,7 @@ func buildStructField(
 			f = *buildRef(child, &f)
 
 		default:
-			sklog.UnexpectedType("struct field node", child.Type)
+			sklog.UnexpectedType("struct field node", child.Type.String())
 		}
 	}
 

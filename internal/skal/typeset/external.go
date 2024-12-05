@@ -27,7 +27,7 @@ func buildExtern(n node) []*External {
 			extern = append(extern, &external)
 
 		default:
-			sklog.UnexpectedType("typeset extern", child.Type)
+			sklog.UnexpectedType("typeset extern", child.Type.String())
 		}
 	}
 
@@ -48,7 +48,7 @@ func buildExternal(n node, p SkalType) External {
 			ext.Alias = child.Value
 
 		default:
-			sklog.UnexpectedType("external node", child.Type)
+			sklog.UnexpectedType("external node", child.Type.String())
 		}
 	}
 

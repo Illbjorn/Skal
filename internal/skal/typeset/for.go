@@ -51,7 +51,7 @@ func buildFor(n node, p SkalType) For {
 			f.Block = append(f.Block, buildBlock(child, &f)...)
 
 		default:
-			sklog.UnexpectedType("typeset for node", child.Type)
+			sklog.UnexpectedType("typeset for node", child.Type.String())
 		}
 	}
 
@@ -80,7 +80,7 @@ func buildForIterator(n node, p SkalType) ForI {
 			f = *buildRef(child, &f)
 
 		default:
-			sklog.UnexpectedType("typeset for iterator node", child.Type)
+			sklog.UnexpectedType("typeset for iterator node", child.Type.String())
 		}
 	}
 
@@ -98,8 +98,8 @@ func NewForV(n *parse.Node, p SkalType) ForV {
 // A single For iterable.
 type ForV struct {
 	SkalType
-	IterableType string
 	Value        string
+	IterableType token.Type
 }
 
 func buildForIterable(n node, p SkalType) ForV {
@@ -122,7 +122,7 @@ func buildForIterable(n node, p SkalType) ForV {
 			f.Value = child.Value
 
 		default:
-			sklog.UnexpectedType("typeset for iterable node", child.Type)
+			sklog.UnexpectedType("typeset for iterable node", child.Type.String())
 		}
 	}
 

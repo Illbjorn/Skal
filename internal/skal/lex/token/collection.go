@@ -1,6 +1,7 @@
 package token
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 )
@@ -103,6 +104,14 @@ func (tc *Collection) Adv() Token {
 		return &token{_type: EOF}
 	}
 
+	if tc.tokens[tc.pos].Value() == "return" {
+		fmt.Println("Boooop")
+		fmt.Println("Found!")
+		fmt.Println(tc.file)
+		fmt.Println(tc.pos)
+		fmt.Println("Type:", tc.tokens[tc.pos].Type().String())
+	}
+
 	// Return the new "current" token.
 	return tc.tokens[tc.pos]
 }
@@ -111,7 +120,7 @@ func (tc *Collection) Adv() Token {
 //
 // The returned boolean Value indicates whether or not we advanced (e.g. the
 // provided TokenType was found and consumed).
-func (tc *Collection) AdvIf(tts ...string) (Token, bool) {
+func (tc *Collection) AdvIf(tts ...Type) (Token, bool) {
 	for i := 0; i < len(tts); i++ {
 		if tts[i] == tc.LA().Type() {
 			tk := tc.Adv()
@@ -123,7 +132,7 @@ func (tc *Collection) AdvIf(tts ...string) (Token, bool) {
 
 // AdvT advances forward expecting a single provided Token type. If the Token
 // encountered is not as specified, a panic occurs.
-func (tc *Collection) AdvT(tt string) Token {
+func (tc *Collection) AdvT(tt Type) Token {
 	// Get the next token.
 	tk := tc.Adv()
 
@@ -143,7 +152,7 @@ func (tc *Collection) AdvT(tt string) Token {
 // found.
 //
 // If an expected type is not found, an error is thrown.
-func (tc *Collection) AdvOneOfT(tts ...string) Token {
+func (tc *Collection) AdvOneOfT(tts ...Type) Token {
 	// Get the next token.
 	tk := tc.Adv()
 
@@ -160,7 +169,11 @@ func (tc *Collection) AdvOneOfT(tts ...string) Token {
 	//
 
 	// Prepare the 'expected' string.
-	expected := strings.Join(tts, ", ")
+	var expecteds []string
+	for _, v := range tts {
+		expecteds = append(expecteds, v.String())
+	}
+	expected := join(expecteds, ", ")
 
 	assertError(
 		tk.SrcLine(),
@@ -184,7 +197,7 @@ func (tc *Collection) LA() Token {
 
 // NTT returns a boolean Value indicating if the next Token has the provided
 // TokenType.
-func (tc *Collection) NTT(tts ...string) bool {
+func (tc *Collection) NTT(tts ...Type) bool {
 	for _, tt := range tts {
 		if tc.LA().Type() == tt {
 			return true
@@ -193,7 +206,7 @@ func (tc *Collection) NTT(tts ...string) bool {
 	return false
 }
 
-func (tc *Collection) LineAheadContains(tt string) bool {
+func (tc *Collection) LineAheadContains(tt Type) bool {
 	line := tc.LA().LineStart()
 	for i := tc.pos + 1; i < len(tc.tokens); i++ {
 		if tc.tokens[i].LineStart() != line {
