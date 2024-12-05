@@ -10,7 +10,6 @@ import (
 	"github.com/illbjorn/skal/internal/skal/sklog"
 	"github.com/illbjorn/skal/internal/skal/typeset"
 	"github.com/illbjorn/skal/pkg/formatter"
-	"github.com/illbjorn/skal/pkg/fstr"
 )
 
 func Emit(
@@ -178,7 +177,7 @@ func emitStruct(nstruct *typeset.Struct) string {
 	if !nstruct.NoConstructor {
 		// Produce with constructor.
 		f.Str(
-			fstr.PairsStrip(
+			pairs(
 				tmplStruct,
 				"in", stack.Indent(),
 				"local", local,
@@ -188,7 +187,7 @@ func emitStruct(nstruct *typeset.Struct) string {
 	} else {
 		// Produce without constructor.
 		f.Str(
-			fstr.PairsStrip(
+			pairs(
 				tmplStructNoCon,
 				"in", stack.Indent(),
 				"local", local,
@@ -233,7 +232,7 @@ func emitStructConstructor(nstruct *typeset.Struct) string {
 
 		// Format and write the field initializer.
 		fields.Str(
-			fstr.PairsStrip(
+			pairs(
 				tmplStructDefaultConstructorField,
 				"in", stack.Indent(),
 				"ref", f.Ref(),
@@ -247,14 +246,14 @@ func emitStructConstructor(nstruct *typeset.Struct) string {
 	stack.Pop() // Constructor fn instance member scope. --!>
 
 	// Typeset the constructed instance.
-	instance := fstr.PairsStrip(
+	instance := pairs(
 		tmplStructDefaultConstructorInstance,
 		"in", stack.Indent(),
 		"fields", fields.String(),
 	)
 	stack.Pop() // Constructor fn scope. --!>
 
-	return fstr.PairsStrip(
+	return pairs(
 		tmplStructDefaultConstructor,
 		"in", stack.Indent(),
 		"ref", nstruct.Ref(),
@@ -294,7 +293,7 @@ func emitMethod(nstruct *typeset.Struct, fn *typeset.Fn) string {
 		id = fn.ID()
 	}
 
-	return fstr.PairsStrip(
+	return pairs(
 		tmplMethod,
 		"in", stack.Indent(),
 		"struct", nstruct.ID(),
@@ -326,7 +325,7 @@ func emitEnum(enum *typeset.Enum) string {
 	members := enumMembers(enum.Members)
 
 	return f.Str(
-		fstr.PairsStrip(
+		pairs(
 			tmplEnum,
 			"local", local,
 			"ref", enum.Ref(),
@@ -350,7 +349,7 @@ func enumMembers(members []*typeset.EnumMember) string {
 		}
 
 		f.Newline().Str(
-			fstr.PairsStrip(
+			pairs(
 				tmplEnumMember,
 				"in", stack.Indent(),
 				"id", m.Ref(),
@@ -409,7 +408,7 @@ func emitFn(fn *typeset.Fn) string {
 		ref = fn.Ref()
 	}
 
-	return fstr.PairsStrip(
+	return pairs(
 		tmplFn,
 		"in", stack.Indent(),
 		"local", local,
@@ -460,7 +459,7 @@ func emitFnBlock(fn *typeset.Fn, vararg string) string {
 	if vararg != "" {
 		f.Newline().
 			Str(
-				fstr.PairsStrip(
+				pairs(
 					tmplVarArg,
 					"ref", vararg,
 					"in", stack.Indent(),
@@ -505,7 +504,7 @@ func emitAnonFn(fn *typeset.Fn) string {
 
 	return formatter.NewFormatter().
 		Str(
-			fstr.PairsStrip(
+			pairs(
 				tmplFnA,
 				"args", args.String(),
 				"stmt", v,
@@ -719,7 +718,7 @@ func emitFor(nfor *typeset.For) string {
 	// Emit all contained statements.
 	block := emitBlock(nfor.Block)
 
-	return fstr.PairsStrip(
+	return pairs(
 		tmpl,
 		"in", stack.Indent(),
 		"iterators", iterators,
@@ -799,7 +798,7 @@ func emitIf(nif *typeset.If) string {
 	// Block
 	block := emitBlock(nif.Block)
 
-	return fstr.PairsStrip(
+	return pairs(
 		tmplIf,
 		"in", stack.Indent(),
 		"conds", conds,
@@ -820,7 +819,7 @@ func emitElifs(elifs []*typeset.Elif) string {
 	for _, s := range elifs {
 		// Add the elif.
 		f.Newline().Str(
-			fstr.PairsStrip(
+			pairs(
 				tmplElif,
 				"in", stack.Indent(),
 				"conds", emitConditions(s.Conditions),
@@ -842,7 +841,7 @@ func emitElse(nelse *typeset.Else) string {
 
 	f := formatter.NewFormatter()
 	f.Newline().Str(
-		fstr.PairsStrip(
+		pairs(
 			tmplElse,
 			"in", stack.Indent(),
 			"block", emitBlock(nelse.Block),
@@ -920,7 +919,7 @@ func emitBind(bind *typeset.Bind) string {
 
 	// If we have no values, return here (decl only).
 	if len(bind.Values) == 0 {
-		return fstr.PairsStrip(
+		return pairs(
 			tmplDecl,
 			"in", indent,
 			"local", local,
@@ -936,7 +935,7 @@ func emitBind(bind *typeset.Bind) string {
 
 	// String it all together.
 	return formatter.NewFormatter().Str(
-		fstr.PairsStrip(
+		pairs(
 			tmplBind,
 			"in", indent,
 			"local", local,
@@ -990,7 +989,7 @@ func emitCall(call *typeset.Call, value bool, isDefer bool) string {
 		}
 	}
 
-	return fstr.PairsStrip(
+	return pairs(
 		tmplCall,
 		"in", indent,
 		"ref", ref,

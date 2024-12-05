@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/illbjorn/skal/pkg/fstr"
+	"github.com/illbjorn/fstr"
 	"github.com/illbjorn/skal/pkg/pprint"
 )
 
@@ -19,7 +19,6 @@ const (
 	LevelFatal = "FTL"
 )
 
-//goland:noinspection GoUnusedConst,GoUnusedConst
 const (
 	// CompilerEvent Message Types
 	MsgTypeTodo            = "Todo"

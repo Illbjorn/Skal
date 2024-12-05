@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/illbjorn/skal/pkg/fstr"
+	"github.com/illbjorn/fstr"
 )
 
 var helpText = fstr.Pairs(`

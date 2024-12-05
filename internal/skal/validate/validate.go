@@ -5,11 +5,11 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/illbjorn/fstr"
 	"github.com/illbjorn/skal/internal/skal/lex/token"
 	"github.com/illbjorn/skal/internal/skal/lua"
 	"github.com/illbjorn/skal/internal/skal/sklog"
 	"github.com/illbjorn/skal/internal/skal/typeset"
-	"github.com/illbjorn/skal/pkg/fstr"
 )
 
 var sprintf = fmt.Sprintf
@@ -132,14 +132,20 @@ func validateCall(call *typeset.Call) {
 			"fn", call.Ref(),
 		)
 		verr(err, call.Token())
+		return
+	}
+
+	if kt.object == nil {
+		err := fstr.Pairs(
+			"Failed to located called fn: {fn}.",
+			"fn", call.Ref(),
+		)
+
+		verr(err, call.Token())
+		return
 	}
 
 	fn := kt.object.(*typeset.Fn)
-
-	// Confirm the number of args match.
-	if len(call.Args) != len(fn.Args) {
-
-	}
 
 	// Validate arg types match.
 	for _, callArg := range call.Args {

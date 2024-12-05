@@ -1,8 +1,6 @@
 package sklog
 
-import (
-	"github.com/illbjorn/skal/pkg/fstr"
-)
+import "github.com/illbjorn/fstr"
 
 // Logs a generic fatal compiler error.
 func CFatal(msg string) {
@@ -21,8 +19,6 @@ func CFatalF(msg string, pairs ...string) {
 
 // Produces a warning indicating a particular code branch or feature is not yet
 // implemented.
-//
-//goland:noinspection GoUnusedExportedFunction
 func Todo(loc string) {
 	NewCompilerEvent(MsgTypeTodo, LevelWarn).
 		WithCallStack(1).
