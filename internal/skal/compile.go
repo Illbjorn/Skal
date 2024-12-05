@@ -8,7 +8,6 @@ import (
 	"github.com/illbjorn/skal/internal/skal/parse"
 	"github.com/illbjorn/skal/internal/skal/sklog"
 	"github.com/illbjorn/skal/internal/skal/typeset"
-	"github.com/illbjorn/skal/internal/skal/validate"
 	"github.com/illbjorn/skal/pkg/formatter"
 )
 
@@ -69,11 +68,6 @@ func Compile(inputPath, outputPath string) {
 
 	// Write the basic env footer.
 	_, _ = outFile.Write(tmplFooter)
-
-	// Clean up the Validator.
-	// This is to prevent references flowing together across changes in persistent
-	// compiling situations.
-	validate.Reset()
 }
 
 // Compile a single provided File.
@@ -95,9 +89,6 @@ func compileFile(inFile *srcFile, outFile *os.File, emt *formatter.Formatter) {
 
 	// Typeset
 	set := typeset.Typeset(tree)
-
-	// Validate
-	// validate.Validate(&set)
 
 	// Emit
 	compiled := emit.Emit(set, inFile.Path, inFile.Import, emt)

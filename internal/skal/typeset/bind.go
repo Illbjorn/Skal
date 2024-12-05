@@ -34,7 +34,7 @@ func buildBind(n node, p SkalType, rebind bool) Bind {
 			bind.Values = append(bind.Values, &value)
 
 		default:
-			sklog.UnexpectedType("typeset bind node", child.Type)
+			sklog.UnexpectedType("typeset bind node", child.Type.String())
 		}
 	}
 

@@ -46,7 +46,7 @@ func buildIf(n node, p SkalType) If {
 			s.Block = append(s.Block, buildBlock(child, &s)...)
 
 		default:
-			sklog.UnexpectedType("typeset if node", child.Type)
+			sklog.UnexpectedType("typeset if node", child.Type.String())
 		}
 	}
 
@@ -81,7 +81,7 @@ func buildElif(n node, p SkalType) Elif {
 			e.Block = append(e.Block, buildBlock(child, &e)...)
 
 		default:
-			sklog.UnexpectedType("typeset elif node", child.Type)
+			sklog.UnexpectedType("typeset elif node", child.Type.String())
 		}
 	}
 
@@ -111,7 +111,7 @@ func buildElse(n node, p SkalType) Else {
 			e.Block = append(e.Block, buildBlock(child, &e)...)
 
 		default:
-			sklog.UnexpectedType("typeset else node", child.Type)
+			sklog.UnexpectedType("typeset else node", child.Type.String())
 		}
 	}
 
@@ -131,7 +131,7 @@ func buildConditions(vs []*Value, n node, p SkalType) []*Value {
 			vs = append(vs, &value)
 
 		default:
-			sklog.UnexpectedType("typeset conditions node", child.Type)
+			sklog.UnexpectedType("typeset conditions node", child.Type.String())
 		}
 	}
 

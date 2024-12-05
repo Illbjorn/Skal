@@ -11,8 +11,8 @@ import (
 )
 
 type SkalType interface {
-	Type() string
-	SetType(string)
+	Type() token.Type
+	SetType(token.Type)
 	Pub() bool
 	SetPub()
 	ID() string
@@ -29,7 +29,7 @@ type SkalType interface {
 	Token() token.Token
 }
 
-var _ SkalType = new(Base)
+var _ SkalType = (*Base)(nil)
 
 func NewBase(n *parse.Node, p SkalType) *Base {
 	return &Base{
@@ -40,19 +40,18 @@ func NewBase(n *parse.Node, p SkalType) *Base {
 }
 
 type Base struct {
-	_type  string
 	parent SkalType
-	// token  token.Token
 	token  token.Token
 	refs   []string
 	defers []*Statement
+	_type  token.Type
 	pub    bool
 }
 
-func (s *Base) Type() string     { return s._type }
-func (s *Base) SetType(t string) { s._type = t }
-func (s *Base) Pub() bool        { return s.pub }
-func (s *Base) SetPub()          { s.pub = true }
+func (s *Base) Type() token.Type     { return s._type }
+func (s *Base) SetType(t token.Type) { s._type = t }
+func (s *Base) Pub() bool            { return s.pub }
+func (s *Base) SetPub()              { s.pub = true }
 
 func (s *Base) ID() string {
 	if s.RefsLen() == 0 {
@@ -84,7 +83,7 @@ func (s *Base) Ref() string {
 			next = ""
 		}
 
-		if p == token.Comma {
+		if p == token.Comma.String() {
 			out.WriteString(", ")
 			continue
 		}
@@ -92,7 +91,7 @@ func (s *Base) Ref() string {
 		out.WriteString(lua.Translate(p))
 		if i < s.RefsLen()-1 && !strings.HasPrefix(
 			next,
-			"[") && next != token.Comma {
+			"[") && next != token.Comma.String() {
 			out.WriteString(".")
 		}
 	}
@@ -127,7 +126,7 @@ func (s *Base) MethodRef() string {
 			next = ""
 		}
 
-		if p == token.Comma {
+		if p == token.Comma.String() {
 			out.WriteString(", ")
 			continue
 		}
@@ -135,7 +134,7 @@ func (s *Base) MethodRef() string {
 		out.WriteString(lua.Translate(p))
 		if i < s.RefsLen()-2 && !strings.HasPrefix(
 			next,
-			"[") && next != token.Comma {
+			"[") && next != token.Comma.String() {
 			out.WriteString(".")
 		}
 
@@ -199,7 +198,7 @@ func buildRef[T SkalType](n node, t T) T {
 			t.AddRef("[" + strings.Join(buildRefIndex(child), ".") + "]")
 
 		default:
-			sklog.UnexpectedType("typeset ref node", child.Type)
+			sklog.UnexpectedType("typeset ref node", child.Type.String())
 		}
 	}
 
@@ -209,7 +208,7 @@ func buildRef[T SkalType](n node, t T) T {
 func buildRefIndex(n node) []string {
 	var out []string
 	for _, child := range n.Children {
-		if child.Value == token.This {
+		if child.Value == token.This.String() {
 			// 'this'
 			out = append(out, "self")
 		} else {

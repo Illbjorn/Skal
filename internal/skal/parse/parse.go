@@ -88,7 +88,7 @@ func Parse(tc *token.Collection, root, n *Node) *Node {
 			)
 
 		default:
-			sklog.UnexpectedType("LookPast token", tk.Type())
+			sklog.UnexpectedType("LookPast token", tk.Type().String())
 		}
 
 	// 'extern'
@@ -109,7 +109,7 @@ func Parse(tc *token.Collection, root, n *Node) *Node {
 			true)
 
 	default:
-		sklog.UnexpectedType("parse token", tc.LA().Type())
+		sklog.UnexpectedType("parse token", tc.LA().Type().String())
 	}
 
 	root.AddChild(n)
@@ -708,7 +708,7 @@ func parseForIterables(tc *token.Collection) []*Node {
 			)
 
 		default:
-			sklog.UnexpectedType("for iterables token", tk.Type())
+			sklog.UnexpectedType("for iterables token", tk.Type().String())
 		}
 
 		iterables = append(iterables, iterable)
@@ -791,7 +791,7 @@ func parseStatement(tc *token.Collection, stmt *Node) *Node {
 		)
 
 	default:
-		sklog.UnexpectedType("parse statement", tk.Type())
+		sklog.UnexpectedType("parse statement", tk.Type().String())
 	}
 
 	return stmt
@@ -906,7 +906,7 @@ func parseIndex(tc *token.Collection) *Node {
 	return index
 }
 
-var ttsAnyOperator = []string{
+var ttsAnyOperator = []token.Type{
 	// String Concat
 	token.Concat,
 	// Math
@@ -998,7 +998,7 @@ func parseValue(tc *token.Collection) []*Node {
 				default:
 					sklog.UnexpectedType(
 						"parse list literal Value",
-						tc.LA().Type())
+						tc.LA().Type().String())
 				}
 
 				// ','
@@ -1055,7 +1055,7 @@ func parseValueGroup(tc *token.Collection) *Node {
 
 // Classifies a given operator under a broader set of groups for easier building
 // and emitting later on.
-func opType(op string) string {
+func opType(op token.Type) token.Type {
 	switch op {
 	// '!'
 	case token.Not:
@@ -1080,8 +1080,8 @@ func opType(op string) string {
 	default:
 		sklog.CFatalF(
 			"Failed to classify binary operator: {op}.",
-			"op", op,
+			"op", op.String(),
 		)
-		return ""
+		return 0
 	}
 }

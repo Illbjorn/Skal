@@ -40,7 +40,7 @@ func buildCall(n node, p SkalType) Call {
 			c.Args = append(c.Args, &arg)
 
 		default:
-			sklog.UnexpectedType("typeset call node", child.Type)
+			sklog.UnexpectedType("typeset call node", child.Type.String())
 		}
 	}
 
@@ -65,7 +65,7 @@ func buildCallArg(n node, p SkalType) CallArg {
 			arg.Spread = true
 
 		default:
-			sklog.UnexpectedType("typeset call arg node", child.Type)
+			sklog.UnexpectedType("typeset call arg node", child.Type.String())
 		}
 	}
 

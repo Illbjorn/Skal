@@ -27,11 +27,11 @@ func NewNode(tc *token.Collection, tk token.Token) *Node {
 }
 
 type Node struct {
-	Parent   *Node       `json:"-"`
 	Token    token.Token `json:"-"`
+	Parent   *Node       `json:"-"`
 	Value    string      `json:"node_value,omitempty"`
-	Type     string      `json:"node_type"`
 	Children []*Node     `json:"children,omitempty"`
+	Type     token.Type  `json:"node_type"`
 }
 
 /*------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ func (node Node) String() string {
 	return fstr.Pairs(
 		tmplNode,
 		"value", node.Value,
-		"type", node.Type,
+		"type", node.Type.String(),
 		"len", strconv.Itoa(len(node.Children)),
 	)
 }
@@ -79,7 +79,7 @@ func (node *Node) AddChildren(children []*Node) *Node {
  * Getters and Setters
  *----------------------------------------------------------------------------*/
 
-func (node *Node) SetType(t string) *Node {
+func (node *Node) SetType(t token.Type) *Node {
 	node.Type = t
 
 	return node
@@ -90,7 +90,7 @@ func (node *Node) SetToken(tk token.Token) *Node {
 		return node
 	}
 
-	if len(tk.Type()) > 0 && len(node.Type) == 0 {
+	if tk.Type() > 0 && node.Type == 0 {
 		node.Type = tk.Type()
 	}
 
@@ -106,7 +106,7 @@ func (node *Node) SetToken(tk token.Token) *Node {
 // a) It's not empty, and;
 // b) One hasn't already been set.
 func (node *Node) SetTokenOnly(tk token.Token) *Node {
-	if len(tk.Type()) > 0 && len(node.Type) == 0 {
+	if tk.Type() > 0 && node.Type == 0 {
 		node.Type = tk.Type()
 	}
 

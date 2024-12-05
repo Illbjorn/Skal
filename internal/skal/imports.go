@@ -47,12 +47,12 @@ func parseImports(root string, fileContent string, j *job) *job {
 		l = bytes.TrimSpace(l)
 
 		// Ignore comment and blank lines.
-		if bytes.HasPrefix(l, []byte(token.Comment)) || len(l) == 0 {
+		if bytes.HasPrefix(l, []byte(token.Comment.String())) || len(l) == 0 {
 			continue
 		}
 
 		// If it's not an import line, don't bother reading the rest of the File.
-		if !bytes.HasPrefix(l, []byte(token.Import)) {
+		if !bytes.HasPrefix(l, []byte(token.Import.String())) {
 			return j
 		}
 
@@ -66,12 +66,12 @@ func parseImportGuard(root string, l []byte, j *job) *job {
 	l = bytes.TrimSpace(l)
 
 	// Ignore comment and blank lines.
-	if bytes.HasPrefix(l, []byte(token.Comment)) || len(l) == 0 {
+	if bytes.HasPrefix(l, []byte(token.Comment.String())) || len(l) == 0 {
 		return j
 	}
 
 	// If it's not an import line, don't bother reading the rest of the File.
-	if !bytes.HasPrefix(l, []byte(token.Import)) {
+	if !bytes.HasPrefix(l, []byte(token.Import.String())) {
 		return j
 	}
 

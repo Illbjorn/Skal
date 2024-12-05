@@ -14,15 +14,15 @@ type Value struct {
 	SkalType
 	Call       *Call
 	Fn         *Fn
-	Nil        string
+	IntL       string
 	BoolL      string
 	StrL       string
-	IntL       string
+	Nil        string
 	Op         string
-	ValueType  string
 	List       []*Value
 	Group      []*Value
 	Comparison []*Value
+	ValueType  token.Type
 	Not        bool
 }
 
@@ -94,7 +94,7 @@ func buildValue(n node, p SkalType) Value {
 		v.Op = n.Value
 
 	default:
-		sklog.UnexpectedType("typeset value node", n.Type)
+		sklog.UnexpectedType("typeset value node", n.Type.String())
 	}
 
 	return v

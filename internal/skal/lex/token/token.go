@@ -10,8 +10,8 @@ import (
 var itoa = strconv.Itoa
 
 type Token interface {
-	SetType(t string)
-	Type() string
+	SetType(t Type)
+	Type() Type
 	LineStart() int
 	SetLineStart(i int)
 	LineEnd() int
@@ -33,54 +33,54 @@ type Token interface {
 
 func NewToken(tc *Collection) Token {
 	token := &token{value: bytes.NewBuffer(nil)}
-	token.Start = new(Position)
-	token.End = new(Position)
+	token.start = new(Position)
+	token.end = new(Position)
 
 	token.src = func() string {
-		if token.End.Abs < token.Start.Abs {
+		if token.end.Abs < token.start.Abs {
 			return ""
 		}
-		return tc.src[token.Start.Abs:token.End.Abs]
+		return tc.src[token.start.Abs:token.end.Abs]
 	}
 
 	token.srcLine = func() string {
-		return tc.SrcLine(token.Start.Line)
+		return tc.SrcLine(token.start.Line)
 	}
 
 	return token
 }
 
-var _ Token = &token{}
+var _ Token = (*token)(nil)
 
 type token struct {
 	value   *bytes.Buffer
-	Start   *Position
-	End     *Position
+	start   *Position
+	end     *Position
 	src     func() string
 	srcLine func() string
 	file    string
-	_type   string
+	_type   Type
 }
 
 // Type
-func (tk *token) SetType(t string) { tk._type = t }
-func (tk *token) Type() string     { return tk._type }
+func (tk *token) SetType(t Type) { tk._type = t }
+func (tk *token) Type() Type     { return tk._type }
 
 // Line Position
-func (tk *token) LineStart() int     { return tk.Start.Line }
-func (tk *token) SetLineStart(i int) { tk.Start.Line = i }
-func (tk *token) LineEnd() int       { return tk.End.Line }
-func (tk *token) SetLineEnd(i int)   { tk.End.Line = i }
+func (tk *token) LineStart() int     { return tk.start.Line }
+func (tk *token) SetLineStart(i int) { tk.start.Line = i }
+func (tk *token) LineEnd() int       { return tk.end.Line }
+func (tk *token) SetLineEnd(i int)   { tk.end.Line = i }
 
 // Column Position
-func (tk *token) ColumnStart() int     { return tk.Start.Col }
-func (tk *token) SetColumnStart(i int) { tk.Start.Col = i }
-func (tk *token) ColumnEnd() int       { return tk.End.Col }
-func (tk *token) SetColumnEnd(i int)   { tk.End.Col = i }
+func (tk *token) ColumnStart() int     { return tk.start.Col }
+func (tk *token) SetColumnStart(i int) { tk.start.Col = i }
+func (tk *token) ColumnEnd() int       { return tk.end.Col }
+func (tk *token) SetColumnEnd(i int)   { tk.end.Col = i }
 
 // Absolute Source Position
-func (tk *token) SetSrcStart(i int) { tk.Start.Abs = i }
-func (tk *token) SetSrcEnd(i int)   { tk.End.Abs = i }
+func (tk *token) SetSrcStart(i int) { tk.start.Abs = i }
+func (tk *token) SetSrcEnd(i int)   { tk.end.Abs = i }
 
 // Buffer Writer
 func (tk *token) AddRune(r rune) { tk.value.WriteRune(r) }
@@ -106,11 +106,11 @@ Start Y : {sy}
 End X   : {ex}
 End Y   : {ey}`,
 		"File", tk.file,
-		"type", tk._type,
-		"sx", itoa(tk.Start.Col),
-		"sy", itoa(tk.Start.Line),
-		"ex", itoa(tk.End.Col),
-		"ey", itoa(tk.End.Line),
+		"type", tk._type.String(),
+		"sx", itoa(tk.start.Col),
+		"sy", itoa(tk.start.Line),
+		"ex", itoa(tk.end.Col),
+		"ey", itoa(tk.end.Line),
 	)
 }
 

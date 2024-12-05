@@ -93,7 +93,7 @@ func Emit(
 				Str(emitConditional(s))
 
 		default:
-			sklog.UnexpectedType("emit member", o.Type)
+			sklog.UnexpectedType("emit member", o.Type.String())
 		}
 	}
 
@@ -344,7 +344,7 @@ func enumMembers(members []*typeset.EnumMember) string {
 	f := formatter.NewFormatter()
 	for i, m := range members {
 		value := m.Value
-		if m.ValueType == token.StrL {
+		if m.ValueType == token.StrL.String() {
 			value = "'" + value + "'"
 		}
 
@@ -585,7 +585,7 @@ func emitStatement(stmt *typeset.Statement, isDefer bool) string {
 	default:
 		sklog.UnexpectedType(
 			"eStatement()",
-			stmt.StmtType,
+			stmt.StmtType.String(),
 		)
 		return "" // Unreachable
 	}
@@ -658,7 +658,7 @@ func emitValue(value *typeset.Value) string {
 		return " " + lua.Translate(value.Op) + " "
 
 	default:
-		sklog.UnexpectedType("emit Value", value.ValueType)
+		sklog.UnexpectedType("emit Value", value.ValueType.String())
 		return ""
 	}
 }
