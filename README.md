@@ -47,8 +47,8 @@ pub struct Unit {
 }
 
 # Instantiate a Unit.
-let friend = Unit('Champion', UnitType.FRIEND, 7, 36)
-let foe    = Unit('Undead', UnitType.FOE, 12, 21)
+friend = Unit('Champion', UnitType.FRIEND, 7, 36)
+foe    = Unit('Undead', UnitType.FOE, 12, 21)
 
 # Attack!
 friend.attack(foe)
@@ -70,9 +70,11 @@ that's as syntactically light as possible without sacrificing capability.
 ### Readability
 
 The largest is readability. While syntactically and semantically very simple,
-the Lua language relies almost entirely on words rather than symbols. Skal aims
-to preserve that simplicity while reducing the 'noise' of the code by leaning on
-symbols you can better train your brain to "tune out".
+the Lua language relies almost entirely on words rather than symbols. This
+results in some incredbily "noisy" code. When you introduce things like
+comment-based type annotations your code just becomes a wall of text and it
+becomes difficult to hone in quickly on the bits you're looking for when jumping
+around the codebase.
 
 Some implementation examples:
 - `&&` and `||` rather than `and` and `or`
@@ -108,6 +110,17 @@ struct my_obj {
 }
 ```
 
+### A More Modern Language Feel
+
+As mentioned earlier, the Skal syntax is very Rust-y. The idea is to provide a
+feeling of a lovely modern syntax which will feel like a more natural transition
+for natives of more modern languages like Go and Rust.
+
+Some implementation examples:
+- Global scope declarations are controlled via the `pub` keyword.
+- We use `struct`s and `enum`s rather than `table`s (tables do not exist in Skal).
+- Some modern trappings such as `defer` and arrow functions (lambdas) are supported.
+
 ### Type safety!
 
 Lua's extremely basic and dynamic type system coheses well with it's general
@@ -123,13 +136,13 @@ Some example code:
 
 ```
 # These would all be inferred.
-let x = 12             # int
-let y = x              # int
-let a = 'abc'          # int
-let b = 'abc' .. 'def' # str
-let c = b .. a         # str
-let d = 1 + (2 / 12)   # int
-let e = d / (14 * d)   # int
+x = 12             # int
+y = x              # int
+a = 'abc'          # int
+b = 'abc' .. 'def' # str
+c = b .. a         # str
+d = 1 + (2 / 12)   # int
+e = d / (14 * d)   # int
 
 # Function args and return types (if they return a value) always require
 # explicit annotation.
@@ -140,32 +153,22 @@ pub fn some(arg1: str, arg2: str) str {
 }
 ```
 
-### A More Modern Language Feel
-
-As mentioned earlier, the Skal syntax is very Rust-y. The idea is to provide a
-feeling of a lovely modern syntax which will feel like a more natural transition
-for natives of more modern languages like Go and Rust.
-
-Some implementation examples:
-- Global scope declarations are controlled via the `pub` keyword.
-- We use `struct`s and `enum`s rather than `table`s (tables do not exist in Skal).
-- Some modern trappings such as `defer` and arrow functions (lambdas) are supported.
-
 # Language Feature Status
 
 | Feature                                | Status | Notes |
 | -------------------------------------- | ------ | ----- |
 | Undefined Reference Detection          | ✔️      |       |
-| Type System                            | ♻️      |       |
+| Skal Standard Library                  | ♻️      |       |
+| Type System                            | ❌      |       |
 | Pattern Matching, Algebraic Data Types | ❌      |       |
 
 # Tooling Support Status
 
-| Feature                             | Status | Notes |
-| ----------------------------------- | ------ | ----- |
-| Syntax Highlighting, Brace Matching | ✔️      |       |
-| Language Server                     | ❌      |       |
-| Linter                              | ❌      |       |
-| Formatter                           | ❌      |       |
-| Skal Interpreter                    | ❌      |       |
-| Skal LLVM Backend Support           | ❌      |       |
+| Feature                             | Status | Notes                                                           |
+| ----------------------------------- | ------ | --------------------------------------------------------------- |
+| Syntax Highlighting, Brace Matching | ✔️      |                                                                 |
+| Language Server                     | ❌      |                                                                 |
+| Linter                              | ❌      |                                                                 |
+| Formatter                           | ❌      |                                                                 |
+| Skal Interpreter                    | ✔️      | Initial release uses Gopher-Lua, homegrown interpreter to come. |
+| Skal LLVM Backend Support           | ❌      |                                                                 |
