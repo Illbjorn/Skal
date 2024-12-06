@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/illbjorn/skal/internal/skal/emit"
+	"github.com/illbjorn/skal/internal/skal/exec"
 	"github.com/illbjorn/skal/internal/skal/lex"
 	"github.com/illbjorn/skal/internal/skal/parse"
 	"github.com/illbjorn/skal/internal/skal/sklog"
@@ -63,19 +64,61 @@ func Compile(inputPath, outputPath string) {
 
 	// Process source files.
 	for inFile := range j.Gen() {
-		compileFile(inFile, outFile, emt)
+		_, _ = outFile.Write(compileFile(inFile, emt))
 	}
 
 	// Write the basic env footer.
 	_, _ = outFile.Write(tmplFooter)
 }
 
+func CompileAndRun(inputPath string) {
+	// Entrypoint I/O
+	// Read the 'main' File.
+	b, err := os.ReadFile(inputPath)
+	if err != nil {
+		sklog.CFatalF(
+			"Failed to read input File: '{path}', with error: {err}.",
+			"path", inputPath,
+			"err", err.Error(),
+		)
+	}
+
+	// Init the job.
+	j := &job{
+		Main: &srcFile{
+			Path:    inputPath,
+			Content: string(b),
+		},
+	}
+
+	// Assemble all imported modules.
+	j = getImports(j)
+
+	// Write the basic env header.
+	compiled := tmplHeader
+
+	// Init the formatter we'll use to produce the formatted output.
+	// We'll reset this underlying buffer between files to avoid some unnecessary
+	// reallocation.
+	emt := formatter.NewFormatter()
+
+	// Process source files.
+	for inFile := range j.Gen() {
+		compiled = append(compiled, compileFile(inFile, emt)...)
+	}
+
+	// Write the basic env footer.
+	compiled = append(compiled, tmplFooter...)
+
+	exec.Exec(string(compiled))
+}
+
 // Compile a single provided File.
 // Lex -> Parse -> Typeset -> Emit
-func compileFile(inFile *srcFile, outFile *os.File, emt *formatter.Formatter) {
+func compileFile(inFile *srcFile, emt *formatter.Formatter) []byte {
 	// Ignore empty files.
 	if len(inFile.Content) == 0 {
-		return
+		return nil
 	}
 
 	// Reset buffers.
@@ -94,7 +137,7 @@ func compileFile(inFile *srcFile, outFile *os.File, emt *formatter.Formatter) {
 	compiled := emit.Emit(set, inFile.Path, inFile.Import, emt)
 
 	// Write the compiled code.
-	_, _ = outFile.Write(compiled)
+	return compiled
 }
 
 var (

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log/slog"
 	"os"
 	"strings"
 
@@ -35,18 +36,23 @@ Options:
 
 func main() {
 	if len(os.Args) < 2 {
-		printHelpTextAndExit()
+		println(helpText)
+		os.Exit(1)
 	}
+
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	// Look for the called command.
 	called := strings.ToLower(os.Args[1])
 	if called, ok := cmds[called]; !ok {
-		printHelpTextAndExit()
+		println(helpText)
+		os.Exit(1)
 	} else {
 		called.ParseArgs()
 		called.ParseFlags()
 		if err := called.Exec(); err != nil {
-			printHelpTextAndExit()
+			println(helpText)
+			os.Exit(1)
 		}
 	}
 }

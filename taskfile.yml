@@ -134,7 +134,7 @@ tasks:
     cmds:
       - clear
       # DEV_SRC and DEV_DST should be provided by your local `.env` file.
-      - go run '{{ .PATH_DIR_SKAL_MAIN }}' c '{{ .DEV_SRC }}' '{{ .DEV_DST }}'
+      - go run '{{ .PATH_DIR_SKAL_MAIN }}' e '{{ .DEV_SRC }}' # '{{ .DEV_DST }}'
 
   devw:
     aliases: [dw]
