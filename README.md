@@ -76,6 +76,10 @@ comment-based type annotations your code just becomes a wall of text and it
 becomes difficult to hone in quickly on the bits you're looking for when jumping
 around the codebase.
 
+Skal aims to solve this by preserving all the simplicity, but substituting
+keywords with symbols where possible, using shorter keywords in general and
+just overall minimizing typing required to communicate the desired outcome.
+
 Some implementation examples:
 - `&&` and `||` rather than `and` and `or`
 - Scoping behavior is inverted: rather than declaring everything `local` and
