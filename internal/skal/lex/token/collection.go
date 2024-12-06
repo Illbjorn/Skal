@@ -1,7 +1,6 @@
 package token
 
 import (
-	"fmt"
 	"strings"
 	"sync"
 )
@@ -102,14 +101,6 @@ func (tc *Collection) Adv() Token {
 	// Watch out for the end of the slice.
 	if tc.pos >= len(tc.tokens) {
 		return &token{_type: EOF}
-	}
-
-	if tc.tokens[tc.pos].Value() == "return" {
-		fmt.Println("Boooop")
-		fmt.Println("Found!")
-		fmt.Println(tc.file)
-		fmt.Println(tc.pos)
-		fmt.Println("Type:", tc.tokens[tc.pos].Type().String())
 	}
 
 	// Return the new "current" token.

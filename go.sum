@@ -1,2 +1,4 @@
 github.com/illbjorn/fstr v0.0.0-20241023095700-5cd8ed8cb85d h1:3Tmd0ZJ415tZOA6dDWcFoTgugmHh+ynCytxkTZ7OLxk=
 github.com/illbjorn/fstr v0.0.0-20241023095700-5cd8ed8cb85d/go.mod h1:Gm80AnSL7V9Oji9DFU0EvNMRTFvB1vzlSxNtHyQcNtY=
+github.com/yuin/gopher-lua v1.1.1 h1:kYKnWBjvbNP4XLT3+bPEwAXJx262OhaHDWDVOPjL46M=
+github.com/yuin/gopher-lua v1.1.1/go.mod h1:GBR0iDaNXjAgGg9zfCvksxSRnQx76gclCIb7kdAd1Pw=

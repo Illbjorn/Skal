@@ -45,7 +45,8 @@ func (cmd *cmdCompile) ParseArgs() {
 			println(i, ":", arg)
 		}
 		println(len(os.Args))
-		printHelpTextAndExit()
+		println(helpText)
+		os.Exit(1)
 	}
 }
 
