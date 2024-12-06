@@ -7,11 +7,19 @@ interval: 250ms
 
 dotenv: [.env]
 
-vars:
-  PATH_DIR_SKAL_MAIN: ./cmd/skal
-  PATH_DIR_BIN: ./bin
-  PATH_FILE_DEV_BIN: '{{ .PATH_DIR_BIN }}/skal{{ if eq OS "windows" }}.exe{{ end }}'
-  PATH_FILE_VERSION: .github/VERSION
+env:
+  # Directories
+  dir_bin: bin
+  dir_skal_main: ./cmd/skal
+  dir_app_main: ./cmd/skal
+
+  # Files
+  file_version: .github/version
+  file_dev_bin: '{{ .dir_bin }}/skal{{ if eq OS "windows" }}.exe{{ end }}'
+
+  # Repository Details
+  repo_owner: illbjorn
+  repo_name: skal
 
 tasks:
   ##############################################################################
@@ -22,47 +30,54 @@ tasks:
   create-release:
     aliases: [cr]
     desc: Creates a GitHub release.
-    vars:
-      # The tag to create the release from.
+    preconditions:
+      - sh: '[[ -n "{{ .tag }}" ]]'
+        msg: A 'tag' input value is required.
+      - sh: '[[ -n "{{ .title }}" ]]'
+        msg: A 'title' input value is required.
+    env:
       tag: '{{ .tag }}'
-      # The title to use for the release.
       title: '{{ .title }}'
-      # The body to use for the release.
-      body: '{{ if .body }}{{ .body }}{{ else }}{{ end }}'
-    cmd: |
-      gh release create '{{ .tag }}' \
-        --title '{{ .title }}' \
-        --notes '{{ .body }}' \
-        --repo 'illbjorn/skal' \
-        ./bin/*
+      body: '{{ .body }}'
+      files: '{{ .dir_bin }}/*'
+    cmd: .github/scripts/create-release.sh
 
   build-ci:
     aliases: [bci]
-    desc: Performs the multi-GOOS/GOARCH build for GitHub releases.
+    desc: |
+      Performs the misc GOOS/GOARCH permutation of binary builds for GitHub
+      releases.
     vars:
-      TARGETS:
-        - GOOS: windows
-          GOARCH: amd64
-        - GOOS: windows
-          GOARCH: arm64
-        - GOOS: darwin
-          GOARCH: amd64
-        - GOOS: darwin
-          GOARCH: arm64
-        - GOOS: linux
-          GOARCH: amd64
-        - GOOS: linux
-          GOARCH: arm64
-    cmds:
-      - mkdir -p bin
-      - # noinspection YAMLSchemaValidation
-        for:
-          var: TARGETS
-          as: TARGET
-        cmd: |
-          GOOS='{{ .TARGET.GOOS }}' GOARCH='{{ .TARGET.GOARCH }}' go build \
-            -o './bin/skal-{{ .TARGET.GOOS }}-{{ .TARGET.GOARCH }}{{ if eq .TARGET.GOOS "windows" }}.exe{{ end }}' \
-            '{{ .PATH_DIR_SKAL_MAIN }}'
+      targets:
+        - os: windows
+          arch: amd64
+        - os: windows
+          arch: arm64
+        - os: darwin
+          arch: amd64
+        - os: darwin
+          arch: arm64
+        - os: linux
+          arch: amd64
+        - os: linux
+          arch: arm64
+    cmd:
+      for:
+        var: targets
+        as: t
+      vars:
+        os: '{{ .t.os }}'
+        arch: '{{ .t.arch }}'
+      task: build-ci-target
+
+  build-ci-target:
+    desc: Builds the Skal binary for the provided GOOS/GOARCH pair.
+    internal: true
+    env:
+      GOOS: '{{ .os }}'
+      GOARCH: '{{ .arch }}'
+      name_bin: '{{ .repo_name }}-{{ .os }}-{{ .arch }}{{ if eq .os "windows" }}.exe{{ end }}'
+    cmd: .github/scripts/build.sh
 
   release-notes:
     aliases: [rn]
@@ -70,7 +85,7 @@ tasks:
     silent: true
     desc: |
       Produces a set of markdown unordered list bullet points of each commit
-      message between provided refs `s` (start) and `e` (end).
+      message between provided refs 's' (start) and 'e' (end).
     cmd: git log --pretty=format:'- %s' {{ .s }}...{{ .e }}
 
   ##############################################################################
@@ -95,7 +110,7 @@ tasks:
     desc: Outputs the current Skal version.
     silent: true
     interactive: true
-    cmd: cat '{{ .PATH_FILE_VERSION }}'
+    cmd: cat '{{ .file_version }}'
 
   bump:
     aliases: [b]
@@ -117,11 +132,10 @@ tasks:
     vars:
       # Controls the version string segment to be incremented.
       # This is intended to be provided as a command-line input but will default
-      # to `patch`.
+      # to 'patch'.
       s: '{{ if .s }}{{ .s }}{{ else }}patch{{ end }}'
-    cmds:
-      # Bump the version in the file.
-      - .github/scripts/bump.sh '{{ .s }}' '{{ .PATH_FILE_VERSION }}'
+    # Increment the version.
+    cmd: .github/scripts/bump.sh '{{ .s }}' '{{ .file_version }}'
 
   ##############################################################################
   #                                                                            #
@@ -133,43 +147,43 @@ tasks:
     desc: Performs a build and runs the compiler against a Skal source file.
     cmds:
       - clear
-      # DEV_SRC and DEV_DST should be provided by your local `.env` file.
-      - go run '{{ .PATH_DIR_SKAL_MAIN }}' e '{{ .DEV_SRC }}' # '{{ .DEV_DST }}'
+      # dev_src and DEV_DST should be provided by your local '.env' file.
+      - go run '{{ .dir_skal_main }}' e '{{ .dev_src }}'
 
   devw:
     aliases: [dw]
-    desc: Performs a build and runs the compiler against a Skal source file, in watch mode.
+    desc: |
+      Performs a build and runs the compiler against a Skal source file, in
+      watch mode.
     sources:
       - '**/*.go'
-      - '{{ .DEV_WATCH }}'
+      - '{{ .dev_watch }}'
     generates:
-      - '{{ .PATH_FILE_DEV_BIN }}'
+      - '{{ .file_dev_bin }}'
     watch: true
     <<: *task-dev
 
   build:
     aliases: [bu]
     desc: Builds a Skal compiler binary.
-    cmds:
-      - mkdir -p ./bin
-      - go build -o ./bin/skal{{ if eq OS "windows" }}.exe{{ end }} '{{ .PATH_DIR_SKAL_MAIN }}'
+    env:
+      name_bin: '{{ .repo_name }}{{ if eq OS "windows" }}.exe{{ end }}'
+    cmd: .github/scripts/build.sh
 
   install:
     aliases: [i]
-    desc: Performs a `go install` of the Skal compiler.
+    desc: Performs a 'go install' of the Skal compiler.
     cmd: go install ./cmd/skal
 
+  ##############################################################################
+  #                                                                            #
+  #                                    Misc                                    #
+  #                                                                            #
+  ##############################################################################
   count:
     aliases: [c]
     desc: Counts lines of Go code in this repository.
-    cmd: |
-      files=$(find . -type f -name '*.go')
-      total=0
-      for f in $files; do
-        lines=$(wc -l "${f}" | awk '{print $1}')
-        ((total+=lines))
-      done
-      echo $total
+    cmd: .github/scripts/count.sh
 
   test:
     aliases: [t]
