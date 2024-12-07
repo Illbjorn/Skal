@@ -10,13 +10,15 @@ import (
 )
 
 func get(l *lua.LState) int {
-	u := l.Get(-1)
+	var (
+		url = l.Get(-1)
+	)
 
-	if !argv.IsString(u) {
+	if !argv.IsString(url) {
 		return 0
 	}
 
-	if !argv.IsURL(u) {
+	if !argv.IsURL(url) {
 		return 0
 	}
 
@@ -25,7 +27,7 @@ func get(l *lua.LState) int {
 		err error
 	)
 
-	if req, err = http.NewRequest(http.MethodGet, u.String(), nil); err != nil {
+	if req, err = http.NewRequest(http.MethodGet, url.String(), nil); err != nil {
 		slog.Debug(
 			"Failed to create request.",
 			"error", err,

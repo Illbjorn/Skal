@@ -41,3 +41,22 @@ func IsTable(v lua.LValue) bool {
 
 	return false
 }
+
+// -----------------------------------------------------------------------------
+// Nil
+func IsNil(v lua.LValue) bool {
+	if v.Type() == lua.LTNil {
+		return true
+	}
+
+	l := dbgLogger("IsNil")
+
+	l.Debug(
+		"Received invalid parameter value type.",
+		"expected", "nil",
+		"received", v.Type().String(),
+		"value", v.String(),
+	)
+
+	return false
+}

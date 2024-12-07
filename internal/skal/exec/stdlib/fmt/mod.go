@@ -1,10 +1,8 @@
-package conv
+package fmt
 
-import (
-	lua "github.com/yuin/gopher-lua"
-)
+import lua "github.com/yuin/gopher-lua"
 
-const moduleName = "conv"
+const moduleName = "fmt"
 
 func Load(l *lua.LState) {
 	// Fns
@@ -21,9 +19,8 @@ func Load(l *lua.LState) {
 
 func fns() map[string]lua.LGFunction {
 	return map[string]lua.LGFunction{
-		"to_json":   toJSON,
-		"from_json": FromJSON,
-		"to_string": toString,
+		"printfln": printfln,
+		"sprintf":  sprintf,
 	}
 }
 

@@ -7,6 +7,8 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
+const moduleName = "http"
+
 func Load(l *lua.LState) {
 	// Fns
 	t := l.SetFuncs(l.NewTable(), fns())
@@ -17,7 +19,7 @@ func Load(l *lua.LState) {
 	}
 
 	// Set the global var.
-	l.SetGlobal("http", t)
+	l.SetGlobal(moduleName, t)
 }
 
 func fns() map[string]lua.LGFunction {

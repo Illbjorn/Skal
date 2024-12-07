@@ -1,10 +1,13 @@
-package conv
+package time
 
 import (
+	"net/http"
+	"time"
+
 	lua "github.com/yuin/gopher-lua"
 )
 
-const moduleName = "conv"
+const moduleName = "time"
 
 func Load(l *lua.LState) {
 	// Fns
@@ -21,12 +24,14 @@ func Load(l *lua.LState) {
 
 func fns() map[string]lua.LGFunction {
 	return map[string]lua.LGFunction{
-		"to_json":   toJSON,
-		"from_json": FromJSON,
-		"to_string": toString,
+		"now": now,
 	}
 }
 
 func vars() map[string]lua.LValue {
 	return map[string]lua.LValue{}
 }
+
+var (
+	client = http.Client{Timeout: 2000 * time.Millisecond}
+)

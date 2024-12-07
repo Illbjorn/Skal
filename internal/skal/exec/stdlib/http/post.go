@@ -1,32 +1,54 @@
 package http
 
 import (
+	"bytes"
 	"io"
 	"log/slog"
 	"net/http"
-	"strings"
 
 	"github.com/illbjorn/skal/internal/skal/exec/stdlib/argv"
+	"github.com/illbjorn/skal/internal/skal/exec/stdlib/conv"
 	lua "github.com/yuin/gopher-lua"
+)
+
+const (
+	mimeTypeJSON = "application/json"
 )
 
 func post(l *lua.LState) int {
 	var (
-		body = l.Get(-1)
-		url  = l.Get(-2)
+		lbody       = l.Get(-1)
+		buf         = bytes.NewBuffer(nil)
+		err         error
+		contentType = l.Get(-2)
+		url         = l.Get(-3)
 	)
 
 	if !argv.IsString(url) {
 		return 0
 	}
 
-	if !argv.IsString(body) {
+	if !argv.IsString(contentType) {
 		return 0
 	}
 
-	var res *http.Response
-	var err error
-	if res, err = client.Post(url.String(), "application/json", strings.NewReader(body.String())); err != nil {
+	if !argv.IsNil(lbody) {
+		switch contentType.String() {
+		case mimeTypeJSON:
+			switch b := lbody.(type) {
+			case *lua.LTable:
+				buf.WriteString(conv.ToJSON(b))
+			}
+		}
+	}
+
+	var (
+		res *http.Response
+	)
+	if res, err = client.Post(
+		url.String(),
+		contentType.String(),
+		buf); err != nil {
 		slog.Debug(
 			"Failed to perform POST request.",
 			"error", err,
@@ -36,7 +58,9 @@ func post(l *lua.LState) int {
 	}
 	defer res.Body.Close()
 
-	var content []byte
+	var (
+		content []byte
+	)
 	if content, err = io.ReadAll(res.Body); err != nil {
 		slog.Debug(
 			"Failed to read POST response body.",
@@ -46,8 +70,23 @@ func post(l *lua.LState) int {
 		return 0
 	}
 
+	if res.StatusCode >= 400 {
+		slog.Error(
+			"Received >=400 status code response",
+			"status code", res.StatusCode,
+			"body", string(content),
+		)
+		return 0
+	}
+
 	// TODO: Handle by `Content-Type` header.
-	l.Push(lua.LString(string(content)))
+	l.Push(
+		lua.LString(
+			string(
+				content,
+			),
+		),
+	)
 
 	return 1
 }
