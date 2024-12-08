@@ -1,6 +1,7 @@
 package argv
 
 import (
+	"github.com/illbjorn/skal/pkg/clog"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -11,10 +12,9 @@ func IsString(v lua.LValue) bool {
 		return true
 	}
 
-	l := dbgLogger("IsString")
-
-	l.Debug(
+	clog.Debug(
 		"Received invalid parameter value type.",
+		"method", "IsString",
 		"expected", "string",
 		"received", v.Type().String(),
 		"value", v.String(),
@@ -30,10 +30,9 @@ func IsTable(v lua.LValue) bool {
 		return true
 	}
 
-	l := dbgLogger("IsTable")
-
-	l.Debug(
+	clog.Debug(
 		"Received invalid parameter value type.",
+		"method", "IsTable",
 		"expected", "table",
 		"received", v.Type().String(),
 		"value", v.String(),
@@ -49,10 +48,9 @@ func IsNil(v lua.LValue) bool {
 		return true
 	}
 
-	l := dbgLogger("IsNil")
-
-	l.Debug(
+	clog.Debug(
 		"Received invalid parameter value type.",
+		"method", "IsNil",
 		"expected", "nil",
 		"received", v.Type().String(),
 		"value", v.String(),

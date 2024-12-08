@@ -26,7 +26,7 @@ func now(l *lua.LState) int {
 		Nanosecond:  n.Nanosecond(),
 	}
 
-	l.Push(conv.StructToLTable(t, l))
+	l.Push(conv.StructToLTable(t))
 
 	return 1
 }

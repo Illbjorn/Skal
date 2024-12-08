@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"slices"
 
+	"github.com/illbjorn/skal/pkg/clog"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -23,14 +24,13 @@ var httpMethods = []string{
 }
 
 func IsHTTPMethod(v lua.LValue) bool {
-	l := dbgLogger("IsHTTPMethod")
-
 	if slices.Contains(httpMethods, v.String()) {
 		return true
 	}
 
-	l.Debug(
+	clog.Debug(
 		"Received invalid HTTP request method.",
+		"method", "IsHTTPMethod",
 		"value", v.String(),
 	)
 
@@ -40,11 +40,10 @@ func IsHTTPMethod(v lua.LValue) bool {
 // -----------------------------------------------------------------------------
 // Request URL
 func IsURL(v lua.LValue) bool {
-	l := dbgLogger("IsURL")
-
 	if v.Type() != lua.LTString {
-		l.Debug(
+		clog.Debug(
 			"Received invalid parameter value type.",
+			"method", "IsURL",
 			"expected", "string",
 			"received", v.Type().String(),
 			"value", v.String(),
@@ -54,8 +53,9 @@ func IsURL(v lua.LValue) bool {
 	}
 
 	if len(v.String()) == 0 {
-		l.Debug(
+		clog.Debug(
 			"Received zero-length URL string.",
+			"method", "IsURL",
 			"value", v.String(),
 		)
 
@@ -66,8 +66,9 @@ func IsURL(v lua.LValue) bool {
 		err error
 	)
 	if _, err = url.Parse(v.String()); err != nil {
-		l.Debug(
+		clog.Debug(
 			"Failed to parse provided string value as a URL.",
+			"method", "IsURL",
 			"error", err,
 			"value", v.String(),
 		)

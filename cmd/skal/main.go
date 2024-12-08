@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log/slog"
 	"os"
 	"strings"
 
@@ -39,8 +38,6 @@ func main() {
 		println(helpText)
 		os.Exit(1)
 	}
-
-	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	// Look for the called command.
 	called := strings.ToLower(os.Args[1])

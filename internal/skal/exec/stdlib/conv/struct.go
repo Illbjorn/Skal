@@ -2,33 +2,33 @@ package conv
 
 import (
 	"fmt"
-	"log/slog"
 	"reflect"
 
+	"github.com/illbjorn/skal/pkg/clog"
 	lua "github.com/yuin/gopher-lua"
 )
 
-func StructToLTable(value any, l *lua.LState) *lua.LTable {
+func StructToLTable(value any) *lua.LTable {
 	var (
-		t = l.NewTable()
+		t = new(lua.LTable)
 		v = reflect.ValueOf(value)
 	)
 
 	for i := range v.NumField() {
-		f := v.Field(i)
-		fn := v.Type().Field(i).Name
+		field := v.Field(i)
+		fieldName := v.Type().Field(i).Name
 
 		if !v.Type().Field(i).IsExported() {
-			slog.Debug(
+			clog.Debug(
 				"Skipping unsettable field.",
-				"field", fn,
+				"field", fieldName,
 			)
 			continue
 		}
 
-		fv := f.Interface()
+		fv := field.Interface()
 		var next lua.LValue
-		switch f.Kind() {
+		switch field.Kind() {
 		case reflect.String:
 			next = lua.LString(fv.(string))
 
@@ -63,17 +63,17 @@ func StructToLTable(value any, l *lua.LState) *lua.LTable {
 			next = lua.LNumber(fv.(float64))
 
 		case reflect.Struct:
-			next = StructToLTable(fv, l)
+			next = StructToLTable(fv)
 
 		default:
-			slog.Error(
+			clog.Error(
 				"Failed to convert SToT type.",
-				"type", fmt.Sprintf("T: %s\n", f.Kind()),
+				"type", fmt.Sprintf("T: %s\n", field.Kind()),
 			)
 			continue
 		}
 
-		l.SetField(t, fn, next)
+		t.RawSetString(fieldName, next)
 	}
 
 	return t

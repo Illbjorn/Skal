@@ -3,11 +3,11 @@ package http
 import (
 	"bytes"
 	"io"
-	"log/slog"
 	"net/http"
 
 	"github.com/illbjorn/skal/internal/skal/exec/stdlib/argv"
 	"github.com/illbjorn/skal/internal/skal/exec/stdlib/conv"
+	"github.com/illbjorn/skal/pkg/clog"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -49,7 +49,7 @@ func post(l *lua.LState) int {
 		url.String(),
 		contentType.String(),
 		buf); err != nil {
-		slog.Debug(
+		clog.Debug(
 			"Failed to perform POST request.",
 			"error", err,
 		)
@@ -62,7 +62,7 @@ func post(l *lua.LState) int {
 		content []byte
 	)
 	if content, err = io.ReadAll(res.Body); err != nil {
-		slog.Debug(
+		clog.Debug(
 			"Failed to read POST response body.",
 			"error", err,
 		)
@@ -71,7 +71,7 @@ func post(l *lua.LState) int {
 	}
 
 	if res.StatusCode >= 400 {
-		slog.Error(
+		clog.Error(
 			"Received >=400 status code response",
 			"status code", res.StatusCode,
 			"body", string(content),

@@ -2,10 +2,10 @@ package http
 
 import (
 	"io"
-	"log/slog"
 	"net/http"
 
 	"github.com/illbjorn/skal/internal/skal/exec/stdlib/argv"
+	"github.com/illbjorn/skal/pkg/clog"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -28,7 +28,7 @@ func get(l *lua.LState) int {
 	)
 
 	if req, err = http.NewRequest(http.MethodGet, url.String(), nil); err != nil {
-		slog.Debug(
+		clog.Debug(
 			"Failed to create request.",
 			"error", err,
 		)
@@ -41,7 +41,7 @@ func get(l *lua.LState) int {
 	)
 
 	if res, err = client.Do(req); err != nil {
-		slog.Debug(
+		clog.Debug(
 			"Failed to perform GET request.",
 			"error", err,
 		)
@@ -50,7 +50,7 @@ func get(l *lua.LState) int {
 
 	var content []byte
 	if content, err = io.ReadAll(res.Body); err != nil {
-		slog.Debug(
+		clog.Debug(
 			"Failed to read GET response body.",
 			"error", err,
 		)
@@ -62,7 +62,7 @@ func get(l *lua.LState) int {
 		lua.LString(string(content)),
 	)
 
-	slog.Debug("Response successfully pushed to stack.")
+	clog.Debug("Response successfully pushed to stack.")
 
 	return 1
 }

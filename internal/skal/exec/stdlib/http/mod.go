@@ -4,33 +4,20 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/illbjorn/skal/internal/skal/exec/stdlib/module"
 	lua "github.com/yuin/gopher-lua"
 )
 
 const moduleName = "http"
 
-func Load(l *lua.LState) {
-	// Fns
-	t := l.SetFuncs(l.NewTable(), fns())
-
-	// Vars
-	for k, v := range vars() {
-		l.SetField(t, k, v)
+func Module() module.Module {
+	return module.Module{
+		Name: "http",
+		ModuleFns: map[string]lua.LGFunction{
+			"get":  get,
+			"post": post,
+		},
 	}
-
-	// Set the global var.
-	l.SetGlobal(moduleName, t)
-}
-
-func fns() map[string]lua.LGFunction {
-	return map[string]lua.LGFunction{
-		"get":  get,
-		"post": post,
-	}
-}
-
-func vars() map[string]lua.LValue {
-	return map[string]lua.LValue{}
 }
 
 var (

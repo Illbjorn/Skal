@@ -2,9 +2,9 @@ package conv
 
 import (
 	"fmt"
-	"log/slog"
 	"strings"
 
+	"github.com/illbjorn/skal/pkg/clog"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -36,7 +36,7 @@ func LVToString(value lua.LValue) string {
 		return LTableToString(v, 0)
 
 	default:
-		slog.Debug(
+		clog.Debug(
 			"found unexpected value type in ToString",
 			"type", fmt.Sprintf("%T", v),
 		)
@@ -76,7 +76,7 @@ func LTableToString(t *lua.LTable, depth int) string {
 				return
 
 			default:
-				slog.Debug(
+				clog.Debug(
 					"found unexpected TableToString value type",
 					"type", fmt.Sprintf("%T", v),
 				)

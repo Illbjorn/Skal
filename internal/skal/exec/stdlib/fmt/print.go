@@ -2,36 +2,38 @@ package fmt
 
 import (
 	"fmt"
-	"log/slog"
 
+	"github.com/illbjorn/skal/internal/skal/exec/stdlib/argv"
+	"github.com/illbjorn/skal/pkg/clog"
 	lua "github.com/yuin/gopher-lua"
 )
 
 func sprintf(l *lua.LState) int {
+	if l.GetTop() < 3 {
+		clog.Debug(
+			"received insufficient args in call to sprintf",
+		)
+
+		return 0
+	}
+
 	var (
 		tmpl   string
 		values []any
 	)
 
 	// Collect args.
-	for i := 2; i < l.GetTop(); i++ {
-		var (
-			v = l.Get(i)
-		)
-
-		fmt.Println("i:", i, "v:", v)
-
-		if i == 2 {
-			tmpl = v.String()
+	for arg := range argv.Get(l) {
+		if tmpl == "" {
+			tmpl = arg.String()
 			continue
 		}
 
-		values = append(values, v)
+		values = append(values, arg)
 	}
-	l.Pop(l.GetTop() - 2)
 
 	if len(values) == 0 {
-		slog.Debug(
+		clog.Debug(
 			"received zero-length values to sprintf",
 		)
 	}
@@ -55,26 +57,17 @@ func printfln(l *lua.LState) int {
 	)
 
 	// Collect args.
-	for i := 2; i <= l.GetTop(); i++ {
-		var (
-			v = l.Get(i)
-		)
-
-		if v.Type() == lua.LTNil {
+	for arg := range argv.Get(l) {
+		if tmpl == "" {
+			tmpl = arg.String()
 			continue
 		}
 
-		if i == 2 {
-			tmpl = v.String()
-			continue
-		}
-
-		values = append(values, v)
+		values = append(values, arg)
 	}
-	l.Pop(l.GetTop() - 2)
 
 	if len(values) == 0 {
-		slog.Debug(
+		clog.Debug(
 			"received zero-length values to printfln",
 		)
 	}

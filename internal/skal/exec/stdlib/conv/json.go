@@ -3,9 +3,9 @@ package conv
 import (
 	"encoding/json"
 	"fmt"
-	"log/slog"
 
 	"github.com/illbjorn/skal/internal/skal/exec/stdlib/argv"
+	"github.com/illbjorn/skal/pkg/clog"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -40,7 +40,7 @@ func ToJSON(t *lua.LTable) string {
 	)
 
 	if content, err = json.Marshal(m); err != nil {
-		slog.Debug(
+		clog.Debug(
 			"Failed to marshal JSON content.",
 			"error", err,
 		)
@@ -65,7 +65,7 @@ func FromJSON(l *lua.LState) int {
 	m := make(map[string]any)
 	err := json.Unmarshal([]byte(v.String()), &m)
 	if err != nil {
-		slog.Debug(
+		clog.Debug(
 			"failed to unmarshal JSON payload",
 			"error", err,
 		)
@@ -126,7 +126,7 @@ func buildJSON(t *lua.LTable, l *lua.LState, m map[string]any) *lua.LTable {
 			l.SetField(t, k, lua.LBool(v))
 
 		default:
-			slog.Error(
+			clog.Error(
 				"found unexpected JSON value type " + fmt.Sprintf("%T", v),
 			)
 		}
